@@ -204,7 +204,7 @@ details summary{cursor:pointer}
           <option value="occ">Sort: most vacancies</option>
           <option value="name">Sort: name A–Z</option>
         </select>
-        <button class="btn" id="selAll" style="font-weight:700">Select all shown</button><button class="btn" id="copyAll">Copy list</button><span id="copyMsg" class="copied"></span>
+        <button class="btn" id="selAll" style="font-weight:700">Select all shown</button><button class="btn" id="showSel" style="font-weight:700">Show selected (0)</button><button class="btn" id="copyAll">Copy list</button><span id="copyMsg" class="copied"></span>
       </div>
     </div>
     <div class="cards" id="cards"></div>
@@ -229,7 +229,7 @@ details summary{cursor:pointer}
     <div class="hint" id="mMailMsg"></div>
     <div class="hint">Other ways to email: <a id="mGmail" target="_blank" rel="noopener">open in Gmail</a> · <a id="mMailApp">open in your email app</a></div>
     <div class="acts"><button class="btn" id="mDone" style="width:100%">Done, back to home</button></div>
-    <div class="hint">After you tap Email it or Text it, this closes and the Finder goes back to the start for your next client.</div>
+    <div class="hint">After you tap Copy, Email it or Text it, this closes and the Finder clears your picks and goes back to the start for your next client.</div>
   </div>
 </div></div>
 <div class="lb" id="lb"><button class="x" id="lbX" aria-label="Close">×</button><button class="nav prev" id="lbP" aria-label="Previous">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbN" aria-label="Next">›</button><div class="cap" id="lbCap"></div></div>
@@ -386,6 +386,7 @@ function updateBar(){
   $('barN').textContent=`${n} selected`;
   $('hdrShare').textContent=`Share with client (${n})`;if(n)$('hdrMsg').textContent='';
   $('barView').textContent=onlyPicked?'Show all':'Show only selected';
+  $('showSel').textContent=onlyPicked?'Show all properties':`Show selected (${n})`;$('showSel').disabled=!n&&!onlyPicked;$('showSel').classList.toggle('pri',onlyPicked);
 }
 document.addEventListener('change',e=>{
   if(!e.target.classList.contains('pk'))return;
@@ -396,6 +397,7 @@ document.addEventListener('change',e=>{
 });
 $('barClear').onclick=()=>{picked.clear();savePicked();onlyPicked=false;render();};
 $('barView').onclick=()=>{onlyPicked=!onlyPicked;render();};
+$('showSel').onclick=()=>{onlyPicked=!onlyPicked;render();window.scrollTo({top:0,behavior:'smooth'});};
 const selProps=()=>D.filter(p=>picked.has(p.id));
 $('barShare').onclick=()=>{
   const L=selProps();
@@ -473,7 +475,9 @@ $('mMail').onclick=async()=>{
 };
 $('mSms').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
 $('mDone').onclick=()=>backHome(true);
-$('mCopy').onclick=()=>{const i=$('mUrl');i.select();try{navigator.clipboard.writeText(i.value).then(()=>{$('mCopy').textContent='Copied';setTimeout(()=>$('mCopy').textContent='Copy',2000)})}catch(e){document.execCommand('copy')}};
+$('mCopy').onclick=()=>{const i=$('mUrl'),who=$('mClient').value.trim(),url=i.value;i.select();
+  const done=()=>{$('mCopy').textContent='Copied';setTimeout(()=>{$('mCopy').textContent='Copy';backHome(false);$('hdrMsg').textContent=`Link for ${who||'your client'} copied: ${url} · Ready for your next client.`;},1200);};
+  try{navigator.clipboard.writeText(url).then(done).catch(()=>{document.execCommand('copy');done();})}catch(e){document.execCommand('copy');done();}};
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function copyList(){
   const R=filtered();
