@@ -16,7 +16,7 @@ body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:
 .logo .mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--acc),#f3d77a);display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:6px}
 .logo .mark i{display:block;width:5px;background:#0b0d12;border-radius:1px}
 .logo .wm{font-weight:900;letter-spacing:.14em;font-size:15px;text-transform:uppercase}
-.logo .wm small{display:block;font-weight:600;letter-spacing:.08em;font-size:10.5px;color:#d6c27a}
+.logo .wm small{display:block;font-weight:700;letter-spacing:.06em;font-size:12.5px;color:#d6c27a}
 .htop{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-top:14px}
 h1{font-size:24px;margin:0 0 4px;font-weight:900;letter-spacing:-.01em}
 h1 em{font-style:normal;color:var(--acc)}
@@ -116,7 +116,7 @@ details summary{cursor:pointer}
 </head>
 <body>
 <header class="hero"><div class="hin">
-  <div class="logo"><div class="mark"><i style="height:12px"></i><i style="height:22px"></i><i style="height:16px"></i><i style="height:26px"></i></div><div class="wm">High Risers<small>Joseph Dittman · Team Finder</small></div></div>
+  <div class="logo"><div class="mark"><i style="height:12px"></i><i style="height:22px"></i><i style="height:16px"></i><i style="height:26px"></i></div><div class="wm">High Risers<small>Joseph Dittman with High Risers · Team Finder</small></div></div>
   <div class="htop">
     <div><h1>Houston <em>Apartment</em> Finder</h1>
     <div class="sub" id="sub">Loading properties…</div>
@@ -221,6 +221,8 @@ details summary{cursor:pointer}
     <div class="linkbox"><input type="text" id="mUrl" readonly><button class="btn" id="mCopy">Copy</button></div>
     <div class="hint" id="mExp"></div>
     <div class="acts"><a class="btn pri" id="mMail" target="_blank" rel="noopener">Email it</a><a class="btn" id="mSms">Text it</a><a class="btn" id="mOpen" target="_blank" rel="noopener">Preview client page</a></div>
+    <div class="acts"><button class="btn" id="mDone" style="width:100%">Done, back to home</button></div>
+    <div class="hint">After you tap Email it or Text it, this closes and the Finder goes back to the start for your next client.</div>
   </div>
 </div></div>
 <div class="lb" id="lb"><button class="x" id="lbX" aria-label="Close">×</button><button class="nav prev" id="lbP" aria-label="Previous">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbN" aria-label="Next">›</button><div class="cap" id="lbCap"></div></div>
@@ -407,6 +409,19 @@ $('mMake').onclick=async()=>{
   }catch(e){alert('Could not create the link: '+e.message);}
   b.disabled=false; b.textContent='Create link';
 };
+function backHome(sent){
+  const who=$('mClient').value.trim();
+  $('modal').classList.remove('on');
+  picked.clear();savePicked();onlyPicked=false;
+  ['mClient','mEmail','mPhone','mNote'].forEach(id=>$(id).value='');
+  $('mOut').style.display='none';
+  $('reset').onclick();
+  window.scrollTo({top:0,behavior:'smooth'});
+  $('hdrMsg').textContent=sent&&who?`List sent to ${who}. Ready for your next client.`:'';
+}
+$('mMail').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
+$('mSms').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
+$('mDone').onclick=()=>backHome(true);
 $('mCopy').onclick=()=>{const i=$('mUrl');i.select();try{navigator.clipboard.writeText(i.value).then(()=>{$('mCopy').textContent='Copied';setTimeout(()=>$('mCopy').textContent='Copy',2000)})}catch(e){document.execCommand('copy')}};
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function copyList(){
