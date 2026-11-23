@@ -79,6 +79,10 @@ a{color:inherit}
 .special b{color:var(--go)}
 .rb{font-size:13px;background:var(--gold3);border:1px dashed var(--gold);border-radius:9px;padding:7px 10px}
 .rb b{color:#8a6a0c}
+.vids{display:flex;flex-wrap:wrap;gap:8px}
+.vbtn{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--dark);color:#fff;text-decoration:none;font-weight:800;font-size:15px;border-radius:12px;padding:11px 14px}
+.vbtn i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#120e02;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+.vbadge{position:absolute;left:0;top:46px;background:var(--dark);color:#fff;font-weight:800;font-size:11.5px;padding:4px 10px 4px 12px;border-radius:0 999px 999px 0;pointer-events:none}
 .tags{display:flex;flex-wrap:wrap;gap:6px}.tag{font-size:12px;background:#f2efe8;border-radius:6px;padding:2px 8px}
 .cta{margin-top:auto;display:grid;gap:6px}
 .cta .btn{width:100%}
@@ -265,7 +269,7 @@ fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>
   else{
     const cards=P.map((p,k)=>{
       const ph=p.ph||[];
-      const rib=reb?`<div class="ribbon">Up to ${esc(reb)} back</div>`:'';
+      const rib=(reb?`<div class="ribbon">Up to ${esc(reb)} back</div>`:'')+((p.vid||[]).length?`<div class="vbadge">▶ ${esc(p.vid[0].label)}</div>`:'');
       const photos=ph.length?`<div class="pw"><div class="strip ${ph.length===1?'one':''}">${ph.map((a,i)=>`<img loading="lazy" src="${esc(a.thumb)}" alt="${esc(p.n)} photo ${i+1}" data-k="${k}" data-i="${i}" onerror="this.remove()">`).join('')}</div>${rib}<span class="cnt">${ph.length} photo${ph.length>1?'s':''}</span></div>`:`<div class="ph">${rib}Ask ${esc(first)} for photos</div>`;
       const pr=(p.p||[]).map((v,i)=>`<div class="pc ${v==null?'na':''} ${d.br===i&&v!=null?'hit':''}"><b>${money(v)}</b><span>${BR[i]}</span></div>`).join('');
       const tags=[];if(p.type&&p.type!=='Regular')tags.push(p.type);if(p.yb)tags.push('Built '+p.yb+(p.rn?' · Renovated '+p.rn:''));
@@ -274,6 +278,7 @@ fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>
       p._fallback=tour;
       return `<div class="card">${photos}<div class="body"><div><h3>${esc(p.n)}</h3><div class="meta">${esc([p.a||p.c,p.sm].filter(Boolean).join(' · '))}</div></div>
         <div><div class="meta" style="margin-bottom:5px">Starting rent</div><div class="prices">${pr}</div></div>
+        ${(p.vid||[]).length?`<div class="vids">${p.vid.map(v=>`<a class="vbtn" href="${esc(v.url)}" target="_blank" rel="noopener"><i>▶</i>Watch the ${esc(v.label.replace('Video','video'))}</a>`).join('')}</div>`:''}
         ${p.spc?`<div class="special"><b>Property special:</b> ${esc(p.spc)}</div>`:''}
         ${reb?`<div class="rb"><b>PLUS up to ${esc(reb)} back</b> from ${esc(by)} when you lease here<span class="req">On the application, choose "Apartment Locator" and write ${esc(by)}. Not "Leasing Agent" or a website.</span></div>`:''}
         ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}

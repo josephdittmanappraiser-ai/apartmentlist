@@ -69,6 +69,9 @@ input[type=number],input[type=text],select{width:100%;padding:8px 9px;border:1px
 .tag.c{background:#e7f6ec;color:var(--ok);font-weight:600}
 .tag.w{background:#fff4e5;color:var(--warn)}
 .tag.r{background:#fdecea;color:var(--bad)}
+.vids{display:flex;flex-wrap:wrap;gap:6px}
+.vbtn{display:inline-flex;align-items:center;gap:5px;background:var(--dark);color:#fff;text-decoration:none;font-weight:700;font-size:12.5px;border-radius:8px;padding:6px 10px}
+.vbtn b{color:var(--acc)}
 .special{font-size:12.5px;background:#fffbea;border:1px solid #f5e6a8;border-radius:8px;padding:5px 8px}
 details{font-size:12px;color:var(--mute)}
 details summary{cursor:pointer}
@@ -120,7 +123,7 @@ details summary{cursor:pointer}
 </head>
 <body>
 <header class="hero"><div class="hin">
-  <div class="logo"><div class="mark"><i style="height:12px"></i><i style="height:22px"></i><i style="height:16px"></i><i style="height:26px"></i></div><div class="wm">High Risers<small>Joseph Dittman with High Risers · Team Finder</small></div></div>
+  <div class="logo"><div class="mark"><i style="height:12px"></i><i style="height:22px"></i><i style="height:16px"></i><i style="height:26px"></i></div><div class="wm">High Risers<small>Joseph Dittman with High Risers</small></div></div>
   <div class="htop">
     <div><h1>Houston <em>Apartment</em> Finder</h1>
     <div class="sub" id="sub">Loading properties…</div>
@@ -190,6 +193,7 @@ details summary{cursor:pointer}
     <div class="f">
       <label class="check"><input type="checkbox" id="spOnly"> Has a move-in special</label>
       <label class="check"><input type="checkbox" id="phOnly"> Has photos</label>
+      <label class="check"><input type="checkbox" id="vidOnly"> Has a video tour</label>
     </div>
     <button class="btn" id="reset" style="width:100%">Reset filters</button>
   </aside>
@@ -249,8 +253,8 @@ function init(){
   $('refresh').onclick=()=>{setStatus('Refreshing from Airtable…');loadData(true);};
   $('smClear').onclick=()=>{sel.sm.clear();sl.querySelectorAll('input').forEach(i=>i.checked=false);render();};
   ['pmin','pmax','q'].forEach(id=>$(id).oninput=render);
-  ['avail','occ','age','reno','com','spOnly','phOnly','sort'].forEach(id=>$(id).onchange=render);
-  $('reset').onclick=()=>{location.hash='';['pmin','pmax','q'].forEach(id=>$(id).value='');['occ','age','com'].forEach(id=>$(id).value='');$('avail').checked=true;$('reno').checked=false;$('spOnly').checked=false;$('phOnly').checked=false;$('smClear').onclick();sel.ty.clear();rebuildTypes();bc.children[0].click();};
+  ['avail','occ','age','reno','com','spOnly','phOnly','vidOnly','sort'].forEach(id=>$(id).onchange=render);
+  $('reset').onclick=()=>{location.hash='';['pmin','pmax','q'].forEach(id=>$(id).value='');['occ','age','com'].forEach(id=>$(id).value='');$('avail').checked=true;$('reno').checked=false;$('spOnly').checked=false;$('phOnly').checked=false;$('vidOnly').checked=false;$('smClear').onclick();sel.ty.clear();rebuildTypes();bc.children[0].click();};
   $('copyAll').onclick=copyList;
   render();
 }
@@ -287,6 +291,7 @@ function filtered(){
     if(com&&(p.sp||0)<com)return null;
     if(sp&&!p.spc)return null;
     if(onlyPicked&&!picked.has(p.id))return null;
+    if($('vidOnly').checked&&!(p.vid||[]).length)return null;
     if($('phOnly').checked&&!(PH&&PH.get(key(p.n))||[]).length)return null;
     let hits=matchPrice(p);
     if(sel.br!==-1&&!priceSet&&!avail){hits=[sel.br];}
@@ -323,6 +328,7 @@ function render(){
     return `<div class="card${on?' sel':''}" data-id="${esc(p.id)}">${photoBlock(p)}<div class="cbody"><label class="pick"><input type="checkbox" class="pk" data-id="${esc(p.id)}"${on?' checked':''}> ${on?'Selected':'Select to share'}</label><div><h3>${nm}</h3><div class="meta">${esc(p.a||p.c)} · ${esc(p.z)} · ${esc(p.sm)}</div><div class="meta">${esc(p.mg)}</div></div>
     <div class="prices">${pr}</div><div class="tags">${tags.join('')}</div>
     ${p.spc?`<div class="special">${esc(p.spc)}</div>`:''}
+    ${(p.vid||[]).length?`<div class="vids">${p.vid.map(v=>`<a class="vbtn" href="${esc(v.url)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.label)}</a>`).join('')}</div>`:''}
     <details><summary>Source & notes</summary><div style="margin-top:4px">${esc(p.src||'')}</div><div style="margin-top:4px">${esc(p.nt||'')}</div></details></div></div>`;
   }).join('')+(R.length>400?`<div class="empty">Showing first 400 of ${R.length}. Narrow the filters to see the rest.</div>`:'');
 }

@@ -12,6 +12,7 @@ const {
   SITE_USER = "team",
   SITE_PASSWORD,                      // required: the login for the site
   CACHE_MINUTES = "15",
+  VIDEO_FIELD = "",                   // optional: field ID (fld...) that holds video tour links; otherwise they are found automatically
   SHARE_SECRET,                       // optional: signs share links (defaults to SITE_PASSWORD)
   SHARE_DAYS = "30",                  // how long a share link works
   DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || "", // where short links are saved (a Railway volume)
@@ -56,7 +57,7 @@ function readToken(tok) {
 }
 const clientView = (p) => ({
   id: p.id, n: p.n, sm: p.sm, c: p.c, z: p.z, a: p.a, yb: p.yb, rn: p.rn, br: p.br, p: p.p,
-  spc: p.spc, type: p.type, ph: p.ph,
+  spc: p.spc, type: p.type, ph: p.ph, vid: p.vid,
 });
 // --- Short links: /tierra-johnson -> a signed share token, saved on the Railway volume ---
 const LINKS_FILE = DATA_DIR ? path.join(DATA_DIR, "links.json") : "";
@@ -129,7 +130,7 @@ app.post("/api/share/:token/tour", async (req, res) => {
       ["Wants to tour", p.n], ["Preferred time", form.when], ["Message", form.message],
       ["Address", [p.a || p.c, p.z].filter(Boolean).join(", ")], ["Area", p.sm], ["Prices", prices], ["Special", p.spc],
       ["Commission", [p.sp != null ? `Send ${p.sp}%` : "", p.es != null && p.es !== p.sp ? `Escort ${p.es}%` : "", p.bo ? `Bonus ${p.bo}` : ""].filter(Boolean).join(" · ")],
-      ["Management", p.mg], ["Website", p.url],
+      ["Management", p.mg], ["Website", p.url], ["Video tours", (p.vid || []).map((v) => v.url).join("\n")],
       ["Link sent", t.t ? new Date(t.t).toLocaleString("en-US", { timeZone: "America/Chicago" }) : ""],
       ["All properties on their link", others.join(", ")], ["Their link", link],
     ].filter(([, v]) => v);
@@ -196,7 +197,7 @@ async function fetchAllRecords() {
     const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`);
     url.searchParams.set("pageSize", "100");
     url.searchParams.set("returnFieldsByFieldId", "true");
-    for (const id of Object.values(F)) url.searchParams.append("fields[]", id);
+    // all fields are read so video tour links are found wherever they are kept
     if (offset) url.searchParams.set("offset", offset);
     const r = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } });
     if (r.status === 429) { await new Promise((s) => setTimeout(s, 30000)); continue; } // Airtable rate limit
@@ -206,6 +207,35 @@ async function fetchAllRecords() {
     offset = j.offset;
     if (offset) await new Promise((s) => setTimeout(s, 220)); // stay under 5 requests/second
   } while (offset);
+  return out;
+}
+
+// Video tour links: any URL on a known video/3D-tour host, or a video file attachment
+const VIDEO_HOSTS = /(^|\.)(youtube\.com|youtu\.be|vimeo\.com|matterport\.com|loom\.com|wistia\.(com|net)|tiktok\.com|realync\.com|peek\.us|engrain\.com|sightmap\.com|tourbuilder\.|zillow\.com\/view-3d)$/i;
+const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
+function videoKind(u) {
+  try {
+    const x = new URL(u), host = x.hostname.replace(/^www\./, "");
+    if (/matterport|sightmap|engrain|peek\.us|view-3d/i.test(host + x.pathname)) return "3D tour";
+    if (VIDEO_HOSTS.test(host) || /\.(mp4|mov|m4v|webm)(\?|$)/i.test(x.pathname)) return "Video tour";
+  } catch {}
+  return "";
+}
+function findVideos(f) {
+  const out = [], seen = new Set();
+  const add = (url, label) => { if (url && !seen.has(url) && out.length < 6) { seen.add(url); out.push({ url, label }); } };
+  for (const [id, v] of Object.entries(f)) {
+    const forced = VIDEO_FIELD && id === VIDEO_FIELD;
+    if (id === F.notes && !forced) continue; // internal notes stay private
+    const vals = Array.isArray(v) ? v : [v];
+    for (const item of vals) {
+      if (item && typeof item === "object" && item.url) { // attachment
+        if (/^video\//.test(item.type || "") || /\.(mp4|mov|m4v|webm)$/i.test(item.filename || "")) add(item.url, "Video tour");
+      } else if (typeof item === "string") {
+        for (const u of item.match(URL_RE) || []) { const k = videoKind(u); if (k || forced) add(u.replace(/[.,;]+$/, ""), k || "Video tour"); }
+      }
+    }
+  }
   return out;
 }
 
@@ -235,6 +265,7 @@ function toProperty(rec) {
     url: (f[F.site] || "").trim(),
     type: sel(f[F.type]),
     ph: photos,
+    vid: findVideos(f),
   };
 }
 
