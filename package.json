@@ -1,0 +1,16 @@
+{
+  "name": "houston-apartment-finder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Houston Apartment Finder with live Airtable data and photos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

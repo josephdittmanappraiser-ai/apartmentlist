@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Your Houston apartment picks · High Risers</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3ee;--card:#fff;--ink:#111318;--mute:#6b6f78;--line:#e7e3da;--gold:#c9a227;--gold2:#f6e7b0;--gold3:#fff8e1;--dark:#0b0d12;--dark2:#171a22;--go:#16a34a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;padding-bottom:84px}
+a{color:inherit}
+/* announcement bar */
+.ann{background:linear-gradient(90deg,#b8901c,#e3c45a,#b8901c);color:#1a1405;text-align:center;font-weight:800;font-size:13.5px;padding:8px 12px;letter-spacing:.01em}
+.ann a{text-decoration:underline}
+/* hero */
+.hero{background:radial-gradient(1200px 400px at 80% -10%,#2a2f3d 0,transparent 60%),linear-gradient(180deg,var(--dark),var(--dark2));color:#fff;padding:26px 20px 30px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-40px;bottom:-30px;width:280px;height:200px;background:repeating-linear-gradient(90deg,rgba(201,162,39,.10) 0 18px,transparent 18px 30px);transform:skewX(-12deg);pointer-events:none}
+.in{max-width:1100px;margin:0 auto;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .mark{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--gold),#f3d77a);display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:6px}
+.logo .mark i{display:block;width:5px;background:#0b0d12;border-radius:1px}
+.logo .wm{font-weight:900;letter-spacing:.14em;font-size:15px;text-transform:uppercase}
+.logo .wm small{display:block;font-weight:600;letter-spacing:.08em;font-size:10.5px;color:#d6c27a}
+.hero h1{margin:18px 0 6px;font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.12}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero .sub{color:#cfd3dc;font-size:15px;max-width:640px}
+.badge{display:inline-flex;align-items:center;gap:10px;margin-top:16px;background:var(--gold);color:#120e02;border-radius:14px;padding:10px 16px;font-weight:900;box-shadow:0 8px 24px rgba(201,162,39,.35)}
+.badge big{font-size:26px;line-height:1}
+.badge span{font-size:12.5px;line-height:1.2;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.heroCta{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;padding:11px 16px;font-weight:800;text-decoration:none;font-size:15px;border:0;cursor:pointer}
+.btn.gold{background:var(--gold);color:#120e02}
+.btn.white{background:#fff;color:var(--ink)}
+.btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn.green{background:var(--go);color:#fff}
+/* perks */
+.perks{max-width:1100px;margin:-16px auto 0;padding:0 20px;position:relative;z-index:2}
+.perks .row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:760px){.perks .row{grid-template-columns:repeat(2,1fr)}}
+.perk{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.05)}
+.perk b{display:block;font-size:14.5px}
+.perk span{font-size:12.5px;color:var(--mute)}
+.perk .ic{font-size:20px}
+/* note */
+.note{max-width:1100px;margin:18px auto 0;padding:0 20px}
+.note .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.av{flex:0 0 42px;height:42px;border-radius:50%;background:var(--dark);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900}
+.note .who{font-weight:800}.note .who small{font-weight:600;color:var(--mute)}
+.note .txt{white-space:pre-wrap;margin-top:3px}
+/* cards */
+.wrap{max-width:1100px;margin:0 auto;padding:20px 20px 10px}
+.secH{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:6px 0 12px;flex-wrap:wrap}
+.secH h2{margin:0;font-size:20px;font-weight:900}
+.secH span{color:var(--mute);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.pw{position:relative}
+.strip{display:flex;gap:2px;overflow-x:auto;scroll-snap-type:x mandatory;height:215px;background:#ece9e2}
+.strip img{height:215px;width:auto;flex:0 0 auto;object-fit:cover;scroll-snap-align:start;cursor:zoom-in}
+.strip.one img{width:100%}
+.cnt{position:absolute;right:8px;bottom:8px;background:rgba(11,13,18,.75);color:#fff;font-size:11.5px;padding:2px 8px;border-radius:999px;pointer-events:none}
+.ribbon{position:absolute;left:0;top:12px;background:var(--gold);color:#120e02;font-weight:900;font-size:12px;padding:5px 10px 5px 12px;border-radius:0 999px 999px 0;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;text-transform:uppercase;letter-spacing:.03em}
+.ph{height:150px;display:flex;align-items:center;justify-content:center;color:#a39f95;font-size:13px;background:repeating-linear-gradient(45deg,#f0ede6,#f0ede6 10px,#ebe7de 10px,#ebe7de 20px);position:relative}
+.body{padding:14px 15px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.body h3{margin:0;font-size:18.5px;font-weight:800}
+.meta{color:var(--mute);font-size:13px}
+.prices{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;text-align:center}
+.pc{border:1px solid var(--line);border-radius:9px;padding:6px 2px}
+.pc b{display:block;font-size:14px}.pc span{font-size:11px;color:var(--mute)}
+.pc.hit{border-color:var(--gold);background:var(--gold3)}
+.pc.na b{color:#c9c5bb;font-weight:500}
+.special{font-size:13.5px;background:#ecfdf3;border:1px solid #b7ebc9;border-radius:9px;padding:7px 10px}
+.special b{color:var(--go)}
+.rb{font-size:13px;background:var(--gold3);border:1px dashed var(--gold);border-radius:9px;padding:7px 10px}
+.rb b{color:#8a6a0c}
+.tags{display:flex;flex-wrap:wrap;gap:6px}.tag{font-size:12px;background:#f2efe8;border-radius:6px;padding:2px 8px}
+.cta{margin-top:auto;display:grid;gap:6px}
+.cta .btn{width:100%}
+.cta small{text-align:center;color:var(--mute);font-size:11.5px}
+/* promo card */
+.promo{background:linear-gradient(160deg,var(--dark),#22262f);color:#fff;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;border:1px solid #2c303a}
+.promo .big{font-size:40px;font-weight:900;color:var(--gold);line-height:1}
+.promo h3{margin:0;font-size:20px;font-weight:900}
+.promo p{margin:0;color:#cfd3dc;font-size:14px}
+/* how it works */
+.how{max-width:1100px;margin:26px auto 0;padding:0 20px}
+.how .box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+.how h2{margin:0 0 4px;font-size:21px;font-weight:900}
+.how .lead{color:var(--mute);margin:0 0 14px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+.step{background:#faf8f3;border:1px solid var(--line);border-radius:12px;padding:12px}
+.step .n{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#120e02;font-weight:900;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.step b{display:block}
+.step span{font-size:13px;color:var(--mute)}
+.must{margin-top:14px;background:var(--dark);color:#fff;border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.must .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:800}
+.must .val{font-size:18px;font-weight:900}
+.must .why{font-size:12.5px;color:#cfd3dc;flex:1 1 260px}
+/* final */
+.final{max-width:1100px;margin:22px auto 0;padding:0 20px}
+.final .box{background:linear-gradient(90deg,#b8901c,#e3c45a);border-radius:16px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;color:#120e02}
+.final h2{margin:0;font-size:22px;font-weight:900}
+.final p{margin:2px 0 0;font-weight:600}
+.fine{max-width:1100px;margin:18px auto 0;padding:0 20px;color:var(--mute);font-size:11.5px;text-align:center}
+/* sticky */
+.sticky{position:fixed;left:0;right:0;bottom:0;background:var(--dark);color:#fff;padding:10px 14px;display:none;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap;z-index:30;box-shadow:0 -8px 24px rgba(0,0,0,.2)}
+.sticky.on{display:flex}
+.sticky .who{font-weight:800;font-size:14px}
+.sticky .who .sh{display:none}
+.sticky .who small{display:block;font-weight:600;color:var(--gold);font-size:11.5px}
+.sticky .btn{padding:9px 14px;font-size:14px}
+@media(max-width:520px){.sticky{flex-wrap:nowrap;gap:8px;padding:9px 10px}.sticky .who{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sticky .btn{padding:9px 12px;flex:0 0 auto}.sticky .who .lg{display:none}.sticky .who .sh{display:inline}}
+.tm{position:fixed;inset:0;background:rgba(11,13,18,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:14px}
+.tm.on{display:flex}
+.tbox{background:#fff;border-radius:16px;width:min(460px,100%);max-height:94vh;overflow:auto}
+.thead{background:var(--dark);color:#fff;padding:16px 18px;border-radius:16px 16px 0 0}
+.thead .lbl{color:var(--gold);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.thead h3{margin:3px 0 0;font-size:19px}
+.tform{padding:16px 18px 18px;display:grid;gap:10px}
+.tform label{font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.tform input,.tform textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;margin-top:4px}
+.tform textarea{min-height:70px;resize:vertical}
+.tform .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tform .hp{position:absolute;left:-9999px}
+.terr{color:#b42318;font-size:13px;display:none}
+.tok{padding:22px 18px;text-align:center;display:none}
+.tok .big{font-size:40px}
+.tok h3{margin:6px 0}
+.tok p{color:var(--mute);margin:0 0 14px}
+.msg{max-width:540px;margin:60px auto;text-align:center;color:var(--mute);background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px}
+.lb{position:fixed;inset:0;background:rgba(10,12,16,.94);display:none;align-items:center;justify-content:center;z-index:50}
+.lb.on{display:flex}
+.lb img{max-width:94vw;max-height:80vh;border-radius:6px}
+.lb .x,.lb .p,.lb .n{position:absolute;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;width:46px;height:46px;font-size:24px;cursor:pointer}
+.lb .x{top:14px;right:14px}.lb .p{left:12px;top:50%}.lb .n{right:12px;top:50%}
+.lb .cap{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#e5e7eb;font-size:13px;padding:0 12px}
+.lb .cap b{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="ann" id="ann"></div>
+<div class="hero"><div class="in">
+  <div class="logo"><div class="mark"><i style="height:12px"></i><i style="height:22px"></i><i style="height:16px"></i><i style="height:26px"></i></div><div class="wm" id="wm"></div></div>
+  <h1 id="title">Your Houston apartment picks</h1>
+  <div class="sub" id="sub">Loading…</div>
+  <div id="badge"></div>
+  <div class="heroCta" id="heroCta"></div>
+</div></div>
+<div class="perks"><div class="row" id="perks"></div></div>
+<div class="note" id="noteWrap" style="display:none"></div>
+<div class="wrap"><div class="secH"><h2 id="secTitle">Hand-picked for you</h2><span id="secSub"></span></div><div class="cards" id="cards"></div></div>
+<div class="how" id="how"></div>
+<div class="final" id="final"></div>
+<div class="fine" id="fine"></div>
+<div class="sticky" id="sticky"></div>
+<div class="tm" id="tm"><div class="tbox">
+  <div class="thead"><div class="lbl" id="tmLbl">Tour request</div><h3 id="tmTitle"></h3></div>
+  <form class="tform" id="tf">
+    <div><label>Your name</label><input id="tfName" required autocomplete="name"></div>
+    <div class="two"><div><label>Phone</label><input id="tfPhone" type="tel" autocomplete="tel" placeholder="832-555-0100"></div><div><label>Email</label><input id="tfEmail" type="email" autocomplete="email" placeholder="you@email.com"></div></div>
+    <div><label>When can you tour?</label><input id="tfWhen" placeholder="e.g. Saturday afternoon"></div>
+    <div><label>Anything else? (optional)</label><textarea id="tfMsg" placeholder="Questions, move-in date, pets…"></textarea></div>
+    <input class="hp" id="tfWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="terr" id="tfErr"></div>
+    <button class="btn gold" id="tfGo" type="submit">Request my tour</button>
+    <button class="btn" type="button" id="tfX" style="background:#f2efe8">Cancel</button>
+  </form>
+  <div class="tok" id="tok"><div class="big">🎉</div><h3>Request sent!</h3><p id="tokTxt"></p><div class="heroCta" style="justify-content:center" id="tokBtns"></div><button class="btn" id="tokX" style="background:#f2efe8;margin-top:10px">Back to my list</button></div>
+</div></div>
+<div class="lb" id="lb"><button class="x" id="lx" aria-label="Close">×</button><button class="p" id="lp" aria-label="Previous">‹</button><img id="li" alt=""><button class="n" id="ln" aria-label="Next">›</button><div class="cap" id="lc"></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const BR=['Studio','1 BR','2 BR','3 BR','4 BR'];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=v=>v==null?'—':'$'+Number(v).toLocaleString();
+const token=location.pathname.split('/s/')[1]||'';
+const tel=s=>String(s||'').replace(/[^\d+]/g,'');
+const smsHref=(num,body)=>`sms:${tel(num)}${/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent(body)}`;
+let P=[],A={},SH={},lbL=[],lbI=0,lbN='',curK=-1;
+
+fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>{
+  const d=await r.json().catch(()=>({}));
+  A=d.agent||{};SH=d;
+  const name=A.name||'your agent', first=(A.name||'').split(' ')[0]||'me', brand=A.brand||'', reb=A.rebate||'';
+  const by=`${name}${brand?' with '+brand:''}`;
+  const rebLine=reb?`Up to ${reb} rebate`:'';
+  // branding that shows even on error pages
+  $('wm').innerHTML=`${esc(brand||name)}<small>${esc(brand?name+' · Apartment Locator':'Apartment Locator')}</small>`;
+  $('ann').innerHTML=reb?`Lease through ${esc(by)} and get up to ${esc(reb)} back · ${A.phone?`<a href="${esc(smsHref(A.phone,'Hi '+first+'! I want to find an apartment and get my rebate.'))}">Text ${esc(first)} now</a>`:'100% free service'}`:`Free apartment locating with ${esc(by)}`;
+  if(!r.ok){
+    $('title').textContent='This list is no longer available';
+    $('sub').textContent=(d.error||'This link is not available.')+` ${name} can send you a fresh list in minutes.`;
+    heroButtons(first);sticky(first,by,rebLine);return;
+  }
+  P=d.properties||[];
+  const client=d.client||'';
+  document.title=`${client?client+"'s":'Your'} apartment picks · ${brand||name}`;
+  $('title').innerHTML=client?`${esc(client)}, here are your <em>hand-picked</em> Houston apartments`:`Your <em>hand-picked</em> Houston apartments`;
+  $('sub').textContent=`${P.length} place${P.length===1?'':'s'} chosen by ${by}, your Houston apartment locator${d.br>=0?' · '+BR[d.br]+' prices highlighted':''}. My service is 100% free to you${reb?`, and you can get up to ${reb} back when you lease through me`:''}.`;
+  if(reb)$('badge').innerHTML=`<div class="badge"><big>${esc(reb)}</big><span>Up to ${esc(reb)}<br>rebate with ${esc(brand||name)}</span></div>`;
+  heroButtons(first);
+  $('perks').innerHTML=[
+    ['💰',reb?`Up to ${reb} back`:'Insider deals',reb?'Cash rebate after you move in':'Specials you won\'t find online'],
+    ['🆓','100% free','Properties pay me, not you'],
+    ['🗓️','Tours set up for you',`${first} books every tour`],
+    ['🏙️','Insider specials','Move-in deals and price drops']
+  ].map(([i,b,s])=>`<div class="perk"><div class="ic">${i}</div><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join('');
+  const ini=(A.name||brand||'HR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  $('noteWrap').innerHTML=`<div class="box"><div class="av">${esc(ini)}</div><div><div class="who">${esc(name)} <small>· ${esc(brand?brand+' Apartment Locator':'Apartment Locator')}</small></div><div class="txt">${esc(d.note||`I pulled these together just for you${client?', '+client:''}. Tell me which ones you love and I'll set up your tours. Remember: list ${by} as your locator so you get your rebate!`)}</div></div></div>`;
+  $('noteWrap').style.display='block';
+  $('secSub').textContent=reb?`Every one qualifies for up to ${reb} back through ${brand||name}`:'';
+  if(!P.length){$('cards').innerHTML=`<div class="msg">These apartments are no longer listed. Text ${esc(first)} for an updated list.</div>`;}
+  else{
+    const cards=P.map((p,k)=>{
+      const ph=p.ph||[];
+      const rib=reb?`<div class="ribbon">Up to ${esc(reb)} back</div>`:'';
+      const photos=ph.length?`<div class="pw"><div class="strip ${ph.length===1?'one':''}">${ph.map((a,i)=>`<img loading="lazy" src="${esc(a.thumb)}" alt="${esc(p.n)} photo ${i+1}" data-k="${k}" data-i="${i}" onerror="this.remove()">`).join('')}</div>${rib}<span class="cnt">${ph.length} photo${ph.length>1?'s':''}</span></div>`:`<div class="ph">${rib}Ask ${esc(first)} for photos</div>`;
+      const pr=(p.p||[]).map((v,i)=>`<div class="pc ${v==null?'na':''} ${d.br===i&&v!=null?'hit':''}"><b>${money(v)}</b><span>${BR[i]}</span></div>`).join('');
+      const tags=[];if(p.type&&p.type!=='Regular')tags.push(p.type);if(p.yb)tags.push('Built '+p.yb+(p.rn?' · Renovated '+p.rn:''));
+      const ask=`Hi ${first}! I'd like to tour ${p.n} and get my rebate.`;
+      const tour=A.phone?smsHref(A.phone,ask):A.email?`mailto:${A.email}?subject=${encodeURIComponent('Tour: '+p.n)}&body=${encodeURIComponent(ask)}`:'';
+      p._fallback=tour;
+      return `<div class="card">${photos}<div class="body"><div><h3>${esc(p.n)}</h3><div class="meta">${esc([p.a||p.c,p.sm].filter(Boolean).join(' · '))}</div></div>
+        <div><div class="meta" style="margin-bottom:5px">Starting rent</div><div class="prices">${pr}</div></div>
+        ${p.spc?`<div class="special"><b>Property special:</b> ${esc(p.spc)}</div>`:''}
+        ${reb?`<div class="rb"><b>PLUS up to ${esc(reb)} back</b> from ${esc(by)} when you lease here</div>`:''}
+        ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
+        <div class="cta">${(SH.tourForm||tour)?`<button class="btn gold tourBtn" data-k="${k}">Tour with ${esc(first)}${reb?' & get up to '+esc(reb)+' back':''}</button>`:''}<small>List ${esc(by)} as your locator</small></div></div></div>`;
+    });
+    const promo=`<div class="promo">${reb?`<div class="big">${esc(reb)}</div>`:''}<h3>${reb?`Get up to ${esc(reb)} back`:'Want more options?'}</h3><p>${reb?`Lease any of these through ${esc(by)} and get a rebate after you move in. It costs you nothing extra.`:`${esc(first)} can find more places that fit.`}</p>${A.phone?`<a class="btn gold" href="${esc(smsHref(A.phone,'Hi '+first+"! I have questions about the rebate and these apartments."))}">Text ${esc(first)}</a>`:''}</div>`;
+    const out=[];cards.forEach((c,i)=>{out.push(c);if(i===1||(i>1&&(i-1)%4===0&&i<cards.length-1))out.push(promo);});
+    if(cards.length<2)out.push(promo);
+    $('cards').innerHTML=out.join('');
+  }
+  $('how').innerHTML=`<div class="box"><h2>How it works${reb?` and how to get up to ${esc(reb)} back`:''}</h2><p class="lead">Using ${esc(by)} is 100% free. The apartments pay the locator fee, not you.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><b>Pick your favorites</b><span>Tap "Tour with ${esc(first)}" on any place you like.</span></div>
+      <div class="step"><div class="n">2</div><b>${esc(first)} books your tours</b><span>Same-day tours, plus the latest specials and pricing.</span></div>
+      <div class="step"><div class="n">3</div><b>List your locator</b><span>Write <b>${esc(by)}</b> on the guest card and application.</span></div>
+      <div class="step"><div class="n">4</div><b>${reb?'Get your rebate':'Move in'}</b><span>${reb?`Up to ${esc(reb)} back after you move in.`:'Enjoy your new place.'}</span></div>
+    </div>
+    <div class="must"><div><div class="lbl">Put this on every guest card &amp; application</div><div class="val">Locator: ${esc(by)}</div></div><div class="why">${reb?`This is how your rebate gets tracked. If it's missing, the property won't count you as my referral and you can't get your rebate.`:`This makes sure ${esc(first)} can keep helping you through move-in.`}</div></div></div>`;
+  $('final').innerHTML=`<div class="box"><div><h2>Ready to tour${reb?` and get up to ${esc(reb)} back`:''}?</h2><p>Text ${esc(name)}${brand?' at '+esc(brand):''}. Free service, fast answers.</p></div><div class="heroCta" style="margin:0">${contactBtns(first,'dark')}</div></div>`;
+  $('fine').textContent=`${brand?brand+' · ':''}${name}, apartment locator. ${reb?`Rebates up to ${reb} on qualifying leases; amount varies by property and lease, and is paid after move-in once the property confirms the referral. You must list ${by} as your locator before you apply. `:''}Prices and specials change often and are confirmed before you apply. Photos are from each property.`;
+  sticky(first,by,rebLine);
+}).catch(()=>{$('cards').innerHTML='<div class="msg">Couldn\'t load this page. Check your connection and try again.</div>';});
+
+function contactBtns(first,style){
+  const b=[];
+  if(A.phone){b.push(`<a class="btn ${style==='dark'?'white':'gold'}" href="${esc(smsHref(A.phone,'Hi '+first+'! I saw the apartments you sent.'))}">Text ${esc(first)}</a>`);b.push(`<a class="btn ${style==='dark'?'white':'ghost'}" href="tel:${esc(tel(A.phone))}">Call ${esc(A.phone)}</a>`);}
+  if(A.email)b.push(`<a class="btn ${style==='dark'?'white':'ghost'}" href="mailto:${esc(A.email)}">Email</a>`);
+  return b.join('');
+}
+function heroButtons(first){$('heroCta').innerHTML=contactBtns(first);}
+function sticky(first,by,rebLine){
+  if(!A.phone&&!A.email)return;
+  const short=`${first}${A.brand?' · '+A.brand:''}`;
+  $('sticky').innerHTML=`<div class="who"><span class="lg">${esc(by)}</span><span class="sh">${esc(short)}</span><small>${esc(rebLine||'Free apartment locating')}</small></div>${A.phone?`<a class="btn gold" href="${esc(smsHref(A.phone,'Hi '+first+'! I want to tour and get my rebate.'))}">Text ${esc(first)}</a><a class="btn ghost" href="tel:${esc(tel(A.phone))}">Call</a>`:`<a class="btn gold" href="mailto:${esc(A.email)}">Email ${esc(first)}</a>`}`;
+  $('sticky').classList.add('on');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('.tourBtn'); if(!b)return;
+  const p=P[+b.dataset.k];
+  if(!SH.tourForm){ if(p._fallback) location.href=p._fallback; return; }
+  curK=+b.dataset.k;
+  $('tmTitle').textContent=p.n; $('tmLbl').textContent=A.rebate?`Tour request · up to ${A.rebate} back`:'Tour request';
+  if(!$('tfName').value)$('tfName').value=SH.client||'';
+  $('tfErr').style.display='none'; $('tf').style.display='grid'; $('tok').style.display='none';
+  $('tm').classList.add('on');
+});
+const closeTm=()=>$('tm').classList.remove('on');
+$('tfX').onclick=closeTm; $('tokX').onclick=closeTm;
+$('tm').onclick=e=>{if(e.target.id==='tm')closeTm();};
+$('tf').onsubmit=async e=>{
+  e.preventDefault();
+  const p=P[curK], err=$('tfErr'), go=$('tfGo');
+  const body={propertyId:p.id,name:$('tfName').value.trim(),phone:$('tfPhone').value.trim(),email:$('tfEmail').value.trim(),when:$('tfWhen').value.trim(),message:$('tfMsg').value.trim(),website:$('tfWeb').value};
+  if(!body.phone&&!body.email&&!SH.hasContact){err.textContent='Add a phone number or email so we can reach you.';err.style.display='block';return;}
+  go.disabled=true; go.textContent='Sending…'; err.style.display='none';
+  try{
+    const r=await fetch(`/api/share/${encodeURIComponent(token)}/tour`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){
+      err.innerHTML=esc(d.error||'Something went wrong.')+(p._fallback?` <a href="${esc(p._fallback)}">Text ${esc((A.name||'us').split(' ')[0])} instead</a>`:'');
+      err.style.display='block';
+    }else{
+      const first=(A.name||'').split(' ')[0]||'We';
+      $('tokTxt').textContent=`${first} got your request for ${p.n} and will reach out to set up your tour.${A.rebate?` Remember to list ${A.name}${A.brand?' with '+A.brand:''} as your locator to get up to ${A.rebate} back!`:''}`;
+      $('tokBtns').innerHTML=A.phone?`<a class="btn gold" href="${esc(smsHref(A.phone,`Hi ${first}! I just requested a tour of ${p.n}.`))}">Text ${esc(first)} too</a>`:'';
+      $('tf').style.display='none'; $('tok').style.display='block';
+      $('tfWhen').value='';$('tfMsg').value='';
+    }
+  }catch(x){err.textContent='No connection. Try again or text us.';err.style.display='block';}
+  go.disabled=false; go.textContent='Request my tour';
+};
+function lbShow(){$('li').src=lbL[lbI].full;$('lc').innerHTML=`${esc(lbN)} · ${lbI+1} of ${lbL.length}${A.rebate?` · <b>Up to ${esc(A.rebate)} back with ${esc(A.brand||A.name)}</b>`:''}`;}
+document.addEventListener('click',e=>{const im=e.target.closest&&e.target.closest('.strip img');if(!im)return;const p=P[+im.dataset.k];lbL=p.ph;lbI=+im.dataset.i;lbN=p.n;lbShow();$('lb').classList.add('on');});
+$('lx').onclick=()=>$('lb').classList.remove('on');
+$('lb').onclick=e=>{if(e.target.id==='lb')$('lb').classList.remove('on');};
+$('lp').onclick=()=>{lbI=(lbI-1+lbL.length)%lbL.length;lbShow();};
+$('ln').onclick=()=>{lbI=(lbI+1)%lbL.length;lbShow();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTm();if(!$('lb').classList.contains('on'))return;if(e.key==='Escape')$('lx').click();if(e.key==='ArrowLeft')$('lp').click();if(e.key==='ArrowRight')$('ln').click();});
+</script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>High Risers · Houston Apartment Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2330;--mute:#6b7280;--line:#e5e7eb;--acc:#1f6feb;--acc2:#e8f0fe;--ok:#0f7b3f;--warn:#b45309;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+header{padding:18px 20px 6px}
+h1{font-size:20px;margin:0 0 2px}
+.sub{color:var(--mute);font-size:12.5px}
+.wrap{display:grid;grid-template-columns:290px 1fr;gap:16px;padding:12px 20px 30px;align-items:start}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;position:sticky;top:10px}
+@media(max-width:820px){.panel{position:static}}
+.f{margin-bottom:14px}
+.f label.h{display:block;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-bottom:6px}
+input[type=number],input[type=text],select{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+.row{display:flex;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;cursor:pointer;font:inherit;font-size:13px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sm-list{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.sm-list label{display:flex;gap:6px;align-items:center;padding:2px 0;font-size:13px;cursor:pointer}
+.sm-list .ct{margin-left:auto;color:var(--mute);font-size:11px}
+.check{display:flex;gap:7px;align-items:flex-start;font-size:13px;margin:4px 0;cursor:pointer}
+.hint{color:var(--mute);font-size:11.5px;margin-top:4px;line-height:1.35}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+.btn:hover{background:#f3f4f6}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.count{font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:15.5px}
+.card h3 a{color:var(--ink);text-decoration:none}
+.card h3 a:hover{color:var(--acc);text-decoration:underline}
+.meta{color:var(--mute);font-size:12.5px}
+.prices{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center}
+.pc{border:1px solid var(--line);border-radius:8px;padding:5px 2px}
+.pc b{display:block;font-size:13.5px}
+.pc span{font-size:10.5px;color:var(--mute)}
+.pc.hit{border-color:var(--acc);background:var(--acc2)}
+.pc.na b{color:#c0c4cc;font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11.5px;border-radius:6px;padding:2px 7px;background:#f3f4f6}
+.tag.c{background:#e7f6ec;color:var(--ok);font-weight:600}
+.tag.w{background:#fff4e5;color:var(--warn)}
+.tag.r{background:#fdecea;color:var(--bad)}
+.special{font-size:12.5px;background:#fffbea;border:1px solid #f5e6a8;border-radius:8px;padding:5px 8px}
+details{font-size:12px;color:var(--mute)}
+details summary{cursor:pointer}
+.empty{padding:40px;text-align:center;color:var(--mute);background:#fff;border:1px dashed var(--line);border-radius:12px}
+.copied{color:var(--ok);font-size:12px;margin-left:6px}
+.card{padding:0;overflow:hidden}
+.cbody{padding:12px 14px 13px;display:flex;flex-direction:column;gap:8px}
+.strip{display:flex;gap:2px;overflow-x:auto;scroll-snap-type:x mandatory;height:180px;background:#eef0f3;scrollbar-width:thin}
+.strip img{height:180px;width:auto;max-width:none;flex:0 0 auto;object-fit:cover;scroll-snap-align:start;cursor:zoom-in;background:#e5e7eb}
+.strip.one img{width:100%;object-fit:cover}
+.ph{height:180px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:12.5px;background:repeating-linear-gradient(45deg,#f1f3f6,#f1f3f6 10px,#eceff3 10px,#eceff3 20px)}
+.ph.load{background:#eef0f3;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.pcount{position:relative}
+.pcount span{position:absolute;right:8px;bottom:8px;background:rgba(17,24,39,.72);color:#fff;font-size:11px;padding:2px 7px;border-radius:999px;pointer-events:none}
+.photoStatus{font-size:12px;color:var(--mute);margin-top:4px}
+.photoStatus.err{color:var(--bad)}
+.lb{position:fixed;inset:0;background:rgba(10,12,16,.92);display:none;align-items:center;justify-content:center;z-index:50}
+.lb.on{display:flex}
+.lb img{max-width:92vw;max-height:82vh;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.lb .x,.lb .nav{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:999px;width:44px;height:44px;font-size:22px;cursor:pointer}
+.lb .x{top:16px;right:16px}
+.lb .prev{left:16px;top:50%}.lb .next{right:16px;top:50%}
+.pick{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--acc);user-select:none}
+.card.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc2)}
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111827;color:#fff;border-radius:14px;padding:10px 12px 10px 16px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:40;max-width:94vw}
+.bar.on{display:flex}
+.bar .btn{background:#fff;color:#111827;border:0}
+.bar .btn.pri{background:var(--acc);color:#fff}
+.bar .lnk{background:none;border:0;color:#cbd5e1;cursor:pointer;font:inherit;text-decoration:underline}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.5);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal.on{display:flex}
+.mbox{background:#fff;border-radius:14px;width:min(520px,100%);padding:18px;max-height:92vh;overflow:auto}
+.mbox h2{margin:0 0 10px;font-size:17px}
+.mbox textarea{width:100%;min-height:80px;padding:8px 9px;border:1px solid var(--line);border-radius:8px;font:inherit;resize:vertical}
+.mbox .f{margin-bottom:10px}
+.mlist{font-size:12.5px;color:var(--mute);margin:0 0 10px;padding-left:18px;max-height:120px;overflow:auto}
+.linkbox{display:flex;gap:6px;margin-top:6px}
+.linkbox input{flex:1}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.lb .cap{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#e5e7eb;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>High Risers · Houston Apartment Finder</h1>
+  <div class="sub" id="sub">742 properties paying over 50% commission · lowest price per bedroom size, pulled Nov 21–22, 2026 · call to confirm before sending to a client</div>
+  <div class="photoStatus" id="photoStatus">Loading from Airtable…</div> <button class="btn" id="refresh" style="padding:2px 8px;font-size:12px;margin-top:4px">Refresh from Airtable</button>
+</header>
+<div class="wrap">
+  <aside class="panel">
+    <div class="f">
+      <label class="h">Bedrooms</label>
+      <div class="chips" id="brChips"></div>
+    </div>
+    <div class="f">
+      <label class="h">Price (lowest rent in that size)</label>
+      <div class="row"><input type="number" id="pmin" placeholder="Min $"><input type="number" id="pmax" placeholder="Max $"></div>
+    </div>
+    <div class="f">
+      <label class="h">Location</label>
+      <input type="text" id="q" placeholder="Name, city, zip or street">
+      <div style="height:8px"></div>
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="hint" style="margin:0">Submarkets</span>
+        <button class="btn" style="padding:2px 8px;font-size:12px" id="smClear">Clear</button>
+      </div>
+      <div class="sm-list" id="smList"></div>
+    </div>
+    <div class="f">
+      <label class="h">Unit availability</label>
+      <label class="check"><input type="checkbox" id="avail" checked> Only show sizes with a listed price</label>
+      <div class="hint">A listed price means the property showed an available unit or plan in that size. Unpriced sizes were sold out or "call for details".</div>
+      <div style="height:8px"></div>
+      <select id="occ">
+        <option value="">Any occupancy</option>
+        <option value="97">Occupancy 97% or lower</option>
+        <option value="94">Occupancy 94% or lower</option>
+        <option value="90">Occupancy 90% or lower (more vacancies)</option>
+        <option value="85">Occupancy 85% or lower</option>
+      </select>
+      <div class="hint">Occupancy from SmartApartmentData; lower = more open units.</div>
+    </div>
+    <div class="f">
+      <label class="h">Age of property</label>
+      <select id="age">
+        <option value="">Any year</option>
+        <option value="2020">Built 2020 or newer</option>
+        <option value="2015">Built 2015 or newer</option>
+        <option value="2010">Built 2010 or newer</option>
+        <option value="2000">Built 2000 or newer</option>
+        <option value="old">Built before 2000</option>
+      </select>
+      <label class="check"><input type="checkbox" id="reno"> Count renovation year as the age</label>
+    </div>
+    <div class="f">
+      <label class="h">Min commission (send %)</label>
+      <select id="com">
+        <option value="">Any (over 50%)</option><option value="75">75%+</option><option value="100">100%+</option><option value="125">125%+</option><option value="150">150%+</option>
+      </select>
+    </div>
+    <div class="f">
+      <label class="check"><input type="checkbox" id="spOnly"> Has a move-in special</label>
+      <label class="check"><input type="checkbox" id="phOnly"> Has photos</label>
+    </div>
+    <button class="btn" id="reset" style="width:100%">Reset filters</button>
+  </aside>
+  <main>
+    <div class="top">
+      <div><span class="count" id="count"></span> <span class="meta" id="countSub"></span></div>
+      <div class="row" style="align-items:center">
+        <select id="sort" style="width:auto">
+          <option value="price">Sort: lowest price</option>
+          <option value="com">Sort: highest commission</option>
+          <option value="new">Sort: newest</option>
+          <option value="occ">Sort: most vacancies</option>
+          <option value="name">Sort: name A–Z</option>
+        </select>
+        <button class="btn" id="copyAll">Copy list</button><span id="copyMsg" class="copied"></span>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </main>
+</div>
+<div class="bar" id="bar"><span id="barN"></span><button class="lnk" id="barView">Show only selected</button><button class="lnk" id="barClear">Clear</button><button class="btn pri" id="barShare">Share with client…</button></div>
+<div class="modal" id="modal"><div class="mbox">
+  <h2>Share with a client</h2>
+  <ul class="mlist" id="mList"></ul>
+  <div class="f"><label class="h">Client name (required)</label><input type="text" id="mClient" placeholder="e.g. Tierra Johnson"></div>
+  <div class="f"><label class="h">Client email (optional)</label><input type="text" id="mEmail" placeholder="client@email.com"></div>
+  <div class="f"><label class="h">Client phone (optional)</label><input type="text" id="mPhone" placeholder="832-555-0100"></div>
+  <div class="f"><label class="h">Note to the client (shows on their page)</label><textarea id="mNote" placeholder="Here are the places that fit your budget and move-in date. Let me know which ones you want to tour!"></textarea></div>
+  <div class="hint" id="mBr"></div>
+  <div class="acts"><button class="btn pri" id="mMake">Create link</button><button class="btn" id="mCancel">Close</button></div>
+  <div id="mOut" style="display:none;margin-top:12px">
+    <label class="h">Share link</label>
+    <div class="linkbox"><input type="text" id="mUrl" readonly><button class="btn" id="mCopy">Copy</button></div>
+    <div class="hint" id="mExp"></div>
+    <div class="acts"><a class="btn pri" id="mMail" target="_blank" rel="noopener">Email it</a><a class="btn" id="mSms">Text it</a><a class="btn" id="mOpen" target="_blank" rel="noopener">Preview client page</a></div>
+  </div>
+</div></div>
+<div class="lb" id="lb"><button class="x" id="lbX" aria-label="Close">×</button><button class="nav prev" id="lbP" aria-label="Previous">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbN" aria-label="Next">›</button><div class="cap" id="lbCap"></div></div>
+<script>
+const BR=['Studio','1 BR','2 BR','3 BR','4 BR'];
+let D=[],sel={br:-1,sm:new Set()};
+const $=id=>document.getElementById(id);
+const money=v=>v==null?'—':'$'+v.toLocaleString();
+
+function init(){
+  const bc=$('brChips');
+  [['Any',-1],...BR.map((b,i)=>[b,i])].forEach(([t,i])=>{const c=document.createElement('button');c.className='chip'+(i===-1?' on':'');c.textContent=t;c.onclick=()=>{sel.br=i;[...bc.children].forEach(x=>x.classList.remove('on'));c.classList.add('on');render();};bc.appendChild(c);});
+  rebuildSubmarkets();
+  const sl=$('smList');
+  $('refresh').onclick=()=>{setStatus('Refreshing from Airtable…');loadData(true);};
+  $('smClear').onclick=()=>{sel.sm.clear();sl.querySelectorAll('input').forEach(i=>i.checked=false);render();};
+  ['pmin','pmax','q'].forEach(id=>$(id).oninput=render);
+  ['avail','occ','age','reno','com','spOnly','phOnly','sort'].forEach(id=>$(id).onchange=render);
+  $('reset').onclick=()=>{location.hash='';['pmin','pmax','q'].forEach(id=>$(id).value='');['occ','age','com'].forEach(id=>$(id).value='');$('avail').checked=true;$('reno').checked=false;$('spOnly').checked=false;$('phOnly').checked=false;$('smClear').onclick();bc.children[0].click();};
+  $('copyAll').onclick=copyList;
+  render();
+}
+function rebuildSubmarkets(){
+  const counts={};D.forEach(p=>counts[p.sm]=(counts[p.sm]||0)+1);
+  const sl=$('smList');sl.innerHTML='';
+  Object.keys(counts).sort().forEach(s=>{const l=document.createElement('label');l.innerHTML=`<input type="checkbox" value="${esc(s)}"${sel.sm.has(s)?' checked':''}> ${esc(s)}<span class="ct">${counts[s]}</span>`;l.querySelector('input').onchange=e=>{e.target.checked?sel.sm.add(s):sel.sm.delete(s);render();};sl.appendChild(l);});
+}
+function matchPrice(p){
+  const lo=+$('pmin').value||0,hi=+$('pmax').value||Infinity;
+  const idx=sel.br===-1?[0,1,2,3,4]:[sel.br];
+  const ok=idx.filter(i=>p.p[i]!=null&&p.p[i]>=lo&&p.p[i]<=hi);
+  return ok;
+}
+function filtered(){
+  const q=$('q').value.trim().toLowerCase(),occ=+$('occ').value||null,age=$('age').value,reno=$('reno').checked,com=+$('com').value||0,sp=$('spOnly').checked,avail=$('avail').checked;
+  const priceSet=$('pmin').value||$('pmax').value;
+  return D.map(p=>{
+    if(sel.sm.size&&!sel.sm.has(p.sm))return null;
+    if(q&&!(p.n+' '+p.c+' '+p.z+' '+p.a+' '+p.sm).toLowerCase().includes(q))return null;
+    if(occ&&(p.oc==null||p.oc>occ))return null;
+    const yr=reno&&p.rn?Math.max(p.rn,p.yb||0):p.yb;
+    if(age==='old'){if(!yr||yr>=2000)return null}else if(age){if(!yr||yr<+age)return null}
+    if(com&&(p.sp||0)<com)return null;
+    if(sp&&!p.spc)return null;
+    if(onlyPicked&&!picked.has(p.id))return null;
+    if($('phOnly').checked&&!(PH&&PH.get(key(p.n))||[]).length)return null;
+    let hits=matchPrice(p);
+    if(sel.br!==-1&&!priceSet&&!avail){hits=[sel.br];}
+    if(!hits.length){
+      if(priceSet||avail)return null;
+      if(sel.br!==-1)return null;
+    }
+    const best=hits.length?Math.min(...hits.map(i=>p.p[i])):null;
+    return {p,hits,best,yr};
+  }).filter(Boolean);
+}
+function render(){
+  let R=filtered();
+  const s=$('sort').value;
+  const k={price:r=>r.best??1e9,com:r=>-(r.p.sp||0),new:r=>-(r.yr||0),occ:r=>r.p.oc??999,name:r=>r.p.n};
+  R.sort((a,b)=>{const x=k[s](a),y=k[s](b);return x<y?-1:x>y?1:0;});
+  updateBar();
+  $('count').textContent=R.length+' properties';
+  $('countSub').textContent=sel.br===-1?'':'· '+BR[sel.br];
+  const c=$('cards');
+  if(!R.length){c.innerHTML='<div class="empty">No matches. Try raising the max price or adding submarkets.</div>';return;}
+  c.innerHTML=R.slice(0,400).map(({p,hits,yr})=>{
+    const pr=p.p.map((v,i)=>`<div class="pc ${v==null?'na':''} ${hits.includes(i)?'hit':''}"><b>${money(v)}</b><span>${BR[i]}</span></div>`).join('');
+    const tags=[`<span class="tag c">Send ${p.sp??'?'}%${p.es&&p.es!==p.sp?' · Escort '+p.es+'%':''}</span>`];
+    if(p.bo)tags.push(`<span class="tag c">Bonus ${p.bo}</span>`);
+    if(p.yb)tags.push(`<span class="tag">Built ${p.yb}${p.rn?' · Reno '+p.rn:''}</span>`);
+    if(p.oc!=null)tags.push(`<span class="tag ${p.oc<=90?'c':''}">${p.oc}% occupied</span>`);
+    if(p.u)tags.push(`<span class="tag">${p.u} units</span>`);
+    if(p.cl)tags.push(`<span class="tag">Class ${esc(p.cl)}</span>`);
+    if(p.type)tags.push(`<span class="tag">${esc(p.type)}</span>`);
+    if(p.st!=='Complete')tags.push(`<span class="tag ${p.st==='No price found'?'r':'w'}">${p.st}</span>`);
+    const nm=p.url?`<a href="${p.url}" target="_blank" rel="noopener">${esc(p.n)}</a>`:esc(p.n);
+    const on=picked.has(p.id);
+    return `<div class="card${on?' sel':''}" data-id="${esc(p.id)}">${photoBlock(p)}<div class="cbody"><label class="pick"><input type="checkbox" class="pk" data-id="${esc(p.id)}"${on?' checked':''}> ${on?'Selected':'Select to share'}</label><div><h3>${nm}</h3><div class="meta">${esc(p.a||p.c)} · ${esc(p.z)} · ${esc(p.sm)}</div><div class="meta">${esc(p.mg)}</div></div>
+    <div class="prices">${pr}</div><div class="tags">${tags.join('')}</div>
+    ${p.spc?`<div class="special">${esc(p.spc)}</div>`:''}
+    <details><summary>Source & notes</summary><div style="margin-top:4px">${esc(p.src||'')}</div><div style="margin-top:4px">${esc(p.nt||'')}</div></details></div></div>`;
+  }).join('')+(R.length>400?`<div class="empty">Showing first 400 of ${R.length}. Narrow the filters to see the rest.</div>`:'');
+}
+let PH=null, phState='loading';
+const key=n=>String(n||'').trim().toLowerCase().replace(/\s+/g,' ');
+function photoBlock(p){
+  if(!PH) return '<div class="ph">Photos unavailable</div>';
+  const list=PH.get(key(p.n))||[];
+  if(!list.length) return '<div class="ph">No photos yet</div>';
+  const k=esc(key(p.n));
+  return `<div class="pcount"><div class="strip ${list.length===1?'one':''}">${list.map((a,i)=>`<img loading="lazy" src="${esc(a.thumb)}" alt="${esc(p.n)} photo ${i+1}" data-k="${k}" data-i="${i}" onerror="this.remove()">`).join('')}</div><span>${list.length} photo${list.length>1?'s':''}</span></div>`;
+}
+function setStatus(t,err){const e=$('photoStatus');e.textContent=t;e.classList.toggle('err',!!err);}
+let inited=false;
+async function loadData(refresh){
+  try{
+    const r=await fetch('/api/properties'+(refresh?'?refresh=1':''),{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json();
+    D=d.properties||[];
+    PH=new Map(D.map(p=>[key(p.n),p.ph||[]]));
+    phState='done';
+    const n=D.filter(p=>p.ph&&p.ph.length).length;
+    const when=new Date(d.updatedAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    setStatus(`${D.length} properties · photos for ${n} · live from Airtable, updated ${when}${d.stale?' (Airtable unreachable, showing last copy)':''}`, !!d.stale);
+    $('sub').textContent=`${D.length} properties paying over 50% commission · lowest price per bedroom size · call to confirm before sending to a client`;
+    if(!inited){inited=true;init();}else{rebuildSubmarkets();render();}
+  }catch(e){
+    phState='off';
+    if(!inited){$('cards').innerHTML='<div class="empty">Could not load the data from Airtable. Reload in a minute.</div>';}
+    setStatus('Could not reach Airtable. Reload in a minute.',true);
+  }
+}
+let lbList=[],lbI=0,lbName='';
+function lbShow(){const a=lbList[lbI];$('lbImg').src=a.full;$('lbCap').textContent=`${lbName} · ${lbI+1} of ${lbList.length}`;}
+document.addEventListener('click',e=>{
+  const im=e.target.closest&&e.target.closest('.strip img');
+  if(im){lbList=PH.get(im.dataset.k)||[];lbI=+im.dataset.i;lbName=im.alt.replace(/ photo \d+$/,'');lbShow();$('lb').classList.add('on');}
+});
+$('lbX').onclick=()=>$('lb').classList.remove('on');
+$('lb').onclick=e=>{if(e.target.id==='lb')$('lb').classList.remove('on');};
+$('lbP').onclick=()=>{lbI=(lbI-1+lbList.length)%lbList.length;lbShow();};
+$('lbN').onclick=()=>{lbI=(lbI+1)%lbList.length;lbShow();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('modal').classList.remove('on');if(!$('lb').classList.contains('on'))return;if(e.key==='Escape')$('lb').classList.remove('on');if(e.key==='ArrowLeft')$('lbP').click();if(e.key==='ArrowRight')$('lbN').click();});
+$('lbImg').onerror=()=>{$('lbCap').textContent='This photo could not load. Reload the page to refresh the links.';};
+let picked=new Set(), onlyPicked=false;
+try{picked=new Set(JSON.parse(localStorage.getItem('finderPicked')||'[]'))}catch(e){}
+function savePicked(){try{localStorage.setItem('finderPicked',JSON.stringify([...picked]))}catch(e){}}
+function updateBar(){
+  const n=[...picked].filter(id=>D.some(p=>p.id===id)).length;
+  $('bar').classList.toggle('on',n>0||onlyPicked);
+  $('barN').textContent=`${n} selected`;
+  $('barView').textContent=onlyPicked?'Show all':'Show only selected';
+}
+document.addEventListener('change',e=>{
+  if(!e.target.classList.contains('pk'))return;
+  const id=e.target.dataset.id; e.target.checked?picked.add(id):picked.delete(id);
+  savePicked(); const c=e.target.closest('.card'); c.classList.toggle('sel',e.target.checked);
+  e.target.parentNode.lastChild.textContent=e.target.checked?' Selected':' Select to share';
+  updateBar(); if(onlyPicked)render();
+});
+$('barClear').onclick=()=>{picked.clear();savePicked();onlyPicked=false;render();};
+$('barView').onclick=()=>{onlyPicked=!onlyPicked;render();};
+const selProps=()=>D.filter(p=>picked.has(p.id));
+$('barShare').onclick=()=>{
+  const L=selProps();
+  $('mList').innerHTML=L.map(p=>`<li>${esc(p.n)} · ${esc(p.sm)}</li>`).join('');
+  $('mBr').textContent=sel.br===-1?'All bedroom sizes will show.':`Their page will highlight ${BR[sel.br]} prices (from your bedroom filter).`;
+  $('mOut').style.display='none'; $('modal').classList.add('on');
+};
+$('mCancel').onclick=()=>$('modal').classList.remove('on');
+$('modal').onclick=e=>{if(e.target.id==='modal')$('modal').classList.remove('on');};
+$('mMake').onclick=async()=>{
+  if($('mClient').value.trim().length<2){alert("Enter the client's name first so tour requests are tied to them.");$('mClient').focus();return;}
+  const b=$('mMake'); b.disabled=true; b.textContent='Creating…';
+  try{
+    const r=await fetch('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:selProps().map(p=>p.id),client:$('mClient').value.trim(),clientEmail:$('mEmail').value.trim(),clientPhone:$('mPhone').value.trim(),note:$('mNote').value.trim(),br:sel.br})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||r.status);
+    const L=selProps(), who=$('mClient').value.trim(), ag=d.agent||{};
+    $('mUrl').value=d.url; $('mExp').textContent=`Works for ${d.expiresDays} days. Shows photos, prices and specials, never commission or notes.`;
+    const hi=who?`Hi ${who},`:'Hi,';
+    const sig=[ag.name,ag.brand,ag.phone].filter(Boolean).join('\n');
+    const by=`${ag.name||''}${ag.brand?' with '+ag.brand:''}`, reb=ag.rebate;
+    const body=`${hi}\n\nHere are ${L.length} apartment${L.length>1?'s':''} I hand-picked for you:\n${L.map(p=>'• '+p.n+' ('+p.sm+')').join('\n')}\n\nSee photos, prices and specials, and request tours here:\n${d.url}\n\n${reb?`💰 Lease any of these through me and get up to ${reb} back! Just list ${by} as your apartment locator on every guest card and application.\n\n`:''}My service is 100% free to you. Tap "Tour" on any place and I'll set it up.${sig?'\n\n'+sig:''}`;
+    $('mMail').href=`mailto:${$('mEmail').value.trim().replace(/[^\w.+@-]/g,'')}?subject=${encodeURIComponent((who?who+', your':'Your')+' hand-picked Houston apartments'+(reb?` (up to ${reb} back)`:''))}&body=${encodeURIComponent(body)}`;
+    const sms=`${hi} it's ${ag.name||'your locator'}${ag.brand?' with '+ag.brand:''}! Here are ${L.length} apartments I picked for you: ${d.url}${reb?` Lease through me and get up to ${reb} back. List ${by} as your locator!`:''}`;
+    const ph=$('mPhone').value.replace(/[^\d+]/g,'');
+    $('mSms').href=`sms:${ph}${/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent(sms)}`;
+    $('mOpen').href=d.url; $('mOut').style.display='block';
+  }catch(e){alert('Could not create the link: '+e.message);}
+  b.disabled=false; b.textContent='Create link';
+};
+$('mCopy').onclick=()=>{const i=$('mUrl');i.select();try{navigator.clipboard.writeText(i.value).then(()=>{$('mCopy').textContent='Copied';setTimeout(()=>$('mCopy').textContent='Copy',2000)})}catch(e){document.execCommand('copy')}};
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function copyList(){
+  const R=filtered();
+  const txt=R.slice(0,50).map(({p,hits})=>{
+    const sizes=(hits.length?hits:[0,1,2,3,4].filter(i=>p.p[i]!=null)).map(i=>`${BR[i]} from ${money(p.p[i])}`).join(', ');
+    return `${p.n} (${p.sm}) - ${sizes}${p.spc?' | Special: '+p.spc:''}`;
+  }).join('\n');
+  const done=()=>{$('copyMsg').textContent='Copied '+Math.min(R.length,50);setTimeout(()=>$('copyMsg').textContent='',2500);};
+  try{navigator.clipboard.writeText(txt).then(done).catch(fallback)}catch(e){fallback()}
+  function fallback(){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){$('copyMsg').textContent='Copy blocked';}t.remove();}
+}
+loadData();
+</script>
+</body>
+</html>
