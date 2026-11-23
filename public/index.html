@@ -402,12 +402,12 @@ $('mMake').onclick=async()=>{
     const hi=who?`Hi ${who},`:'Hi,';
     const sig=[ag.name,ag.brand,ag.phone].filter(Boolean).join('\n');
     const by=`${ag.name||''}${ag.brand?' with '+ag.brand:''}`, reb=ag.rebate;
-    const body=`${hi}\n\nHere are ${L.length} apartment${L.length>1?'s':''} I hand-picked for you:\n${L.map(p=>'• '+p.n+' ('+p.sm+')').join('\n')}\n\nSee photos, prices and specials, and request tours here:\n${d.url}\n\n${reb?`💰 Lease any of these through me and get up to ${reb} back! Just list ${by} as your apartment locator on every guest card and application.\n\n`:''}My service is 100% free to you. Tap "Tour" on any place and I'll set it up.${sig?'\n\n'+sig:''}`;
+    const body=`${hi}\n\nHere are ${L.length} apartment${L.length>1?'s':''} I hand-picked for you:\n${L.map(p=>'• '+p.n+' ('+p.sm+')').join('\n')}\n\nSee photos, prices and specials, and request tours here:\n${d.url}\n\n${reb?`💰 Lease any of these through me and get up to ${reb} back!\n\n⚠️ IMPORTANT, this is the only way I can pay your rebate:\nWhen the guest card or application asks "How did you hear about us?", choose "Apartment Locator" (or "Locator Service" / "Realtor") and write: ${by}\nDo NOT choose "Leasing Agent", Apartments.com or Apartment List.\n\n`:''}My service is 100% free to you. Tap "Tour" on any place and I'll set it up.${sig?'\n\n'+sig:''}`;
     const subject=(who?who+', your':'Your')+' hand-picked Houston apartments'+(reb?` (up to ${reb} back)`:'');
     MAIL={subject,body,url:d.url,ready:!!d.emailReady};
     $('mMailMsg').textContent=d.emailReady?'Email it sends the list straight to the client from High Risers. You get a copy.':'Email it opens Gmail with the message written. (To send straight from the Finder, add RESEND_API_KEY in Railway.)';
     setMailLinks();
-    const sms=`${hi} it's ${ag.name||'your locator'}${ag.brand?' with '+ag.brand:''}! Here are ${L.length} apartments I picked for you: ${d.url}${reb?` Lease through me and get up to ${reb} back. List ${by} as your locator!`:''}`;
+    const sms=`${hi} it's ${ag.name||'your locator'}${ag.brand?' with '+ag.brand:''}! Here are ${L.length} apartments I picked for you: ${d.url}${reb?` Get up to ${reb} back when you lease through me. IMPORTANT: on the application, for "How did you hear about us?" choose Apartment Locator and write ${by} (NOT Leasing Agent or Apartments.com). It's the only way I can pay your rebate.`:''}`;
     const ph=$('mPhone').value.replace(/[^\d+]/g,'');
     $('mSms').href=`sms:${ph}${/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent(sms)}`;
     $('mOpen').href=d.url; $('mOut').style.display='block';

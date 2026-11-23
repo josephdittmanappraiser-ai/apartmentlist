@@ -109,6 +109,47 @@ a{color:inherit}
 .final h2{margin:0;font-size:22px;font-weight:900}
 .final p{margin:2px 0 0;font-weight:600}
 .fine{max-width:1100px;margin:18px auto 0;padding:0 20px;color:var(--mute);font-size:11.5px;text-align:center}
+/* referral source */
+.ref{max-width:1100px;margin:18px auto 0;padding:0 20px}
+.ref .box{background:#fff;border:3px solid #dc2626;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(220,38,38,.12)}
+.ref .rh{background:#dc2626;color:#fff;padding:14px 18px}
+.ref .rh .tag{display:inline-block;background:#fff;color:#b91c1c;font-weight:900;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
+.ref .rh h2{margin:8px 0 2px;font-size:23px;font-weight:900;line-height:1.15}
+.ref .rh p{margin:0;font-size:14.5px;color:#fee2e2}
+.ref .rb2{padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:760px){.ref .rb2{grid-template-columns:1fr}}
+.ref .only{margin:0 18px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:800;color:#991b1b;text-align:center}
+.ref .only big{display:block;font-size:19px;font-weight:900;color:#b91c1c;margin-bottom:2px}
+/* the picture of an application form */
+.mock{background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.mock .mt{background:#e2e8f0;padding:7px 10px;font-size:12px;color:#475569;display:flex;gap:6px;align-items:center}
+.mock .mt i{width:9px;height:9px;border-radius:50%;background:#cbd5e1;display:inline-block}
+.mock .mb{padding:12px 14px}
+.mock .ml{font-size:13px;font-weight:700;color:#334155;margin:0 0 5px}
+.mock .ml em{color:#dc2626;font-style:normal}
+.mock .ms{border:2px solid #16a34a;border-radius:6px;background:#fff;padding:8px 10px;font-size:14px;display:flex;justify-content:space-between;color:#111}
+.mock ul{list-style:none;margin:2px 0 12px;padding:4px 0;border:1px solid #cbd5e1;border-radius:6px;background:#fff;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.mock li{padding:6px 10px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mock li.no{color:#94a3b8;text-decoration:line-through}
+.mock li.no:after{content:"✕ No";display:inline-block;text-decoration:none;color:#dc2626;font-weight:700;font-size:11.5px;white-space:nowrap}
+.mock li.yes{color:#14532d;font-weight:700}
+.mock li.yes:after{content:"✓ Yes";color:#16a34a;font-weight:900;font-size:11.5px;white-space:nowrap}
+.mock li.pick{background:#dcfce7;outline:2px solid #16a34a;outline-offset:-2px}
+.mock li.pick:after{content:"✓ Pick this";}
+.mock .mi{border:2px solid #16a34a;border-radius:6px;background:#fff;padding:8px 10px;font-size:14px;font-weight:700;color:#111}
+.mock .cap{font-size:11.5px;color:#64748b;margin-top:8px;text-align:center}
+.yn{display:grid;gap:12px}
+.yn .ok,.yn .bad{border-radius:12px;padding:12px 14px}
+.yn .ok{background:#f0fdf4;border:2px solid #16a34a}
+.yn .bad{background:#fef2f2;border:2px solid #dc2626}
+.yn b.t{display:block;font-size:15px;font-weight:900;margin-bottom:4px}
+.yn .ok b.t{color:#15803d}.yn .bad b.t{color:#b91c1c}
+.yn ul{margin:0;padding-left:20px;font-size:15px;font-weight:700}
+.yn small{display:block;margin-top:6px;color:#7f1d1d;font-size:12.5px}
+.yn .write{background:var(--dark);color:#fff;border-radius:12px;padding:12px 14px}
+.yn .write .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:800}
+.yn .write .val{font-size:19px;font-weight:900}
+.rb .req{display:block;margin-top:3px;color:#b91c1c;font-weight:700}
 /* sticky */
 .sticky{position:fixed;left:0;right:0;bottom:0;background:var(--dark);color:#fff;padding:10px 14px;display:none;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap;z-index:30;box-shadow:0 -8px 24px rgba(0,0,0,.2)}
 .sticky.on{display:flex}
@@ -156,6 +197,7 @@ a{color:inherit}
 </div></div>
 <div class="perks"><div class="row" id="perks"></div></div>
 <div class="note" id="noteWrap" style="display:none"></div>
+<div class="ref" id="ref"></div>
 <div class="wrap"><div class="secH"><h2 id="secTitle">Hand-picked for you</h2><span id="secSub"></span></div><div class="cards" id="cards"></div></div>
 <div class="how" id="how"></div>
 <div class="final" id="final"></div>
@@ -217,6 +259,7 @@ fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>
   const ini=(A.name||brand||'HR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   $('noteWrap').innerHTML=`<div class="box"><div class="av">${esc(ini)}</div><div><div class="who">${esc(name)} <small>· ${esc(brand?brand+' Apartment Locator':'Apartment Locator')}</small></div><div class="txt">${esc(d.note||`I pulled these together just for you${client?', '+client:''}. Tell me which ones you love and I'll set up your tours. Remember: list ${by} as your locator so you get your rebate!`)}</div></div></div>`;
   $('noteWrap').style.display='block';
+  $('ref').innerHTML=referralHTML(by,first,reb);
   $('secSub').textContent=reb?`Every one qualifies for up to ${reb} back through ${brand||name}`:'';
   if(!P.length){$('cards').innerHTML=`<div class="msg">These apartments are no longer listed. Text ${esc(first)} for an updated list.</div>`;}
   else{
@@ -232,7 +275,7 @@ fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>
       return `<div class="card">${photos}<div class="body"><div><h3>${esc(p.n)}</h3><div class="meta">${esc([p.a||p.c,p.sm].filter(Boolean).join(' · '))}</div></div>
         <div><div class="meta" style="margin-bottom:5px">Starting rent</div><div class="prices">${pr}</div></div>
         ${p.spc?`<div class="special"><b>Property special:</b> ${esc(p.spc)}</div>`:''}
-        ${reb?`<div class="rb"><b>PLUS up to ${esc(reb)} back</b> from ${esc(by)} when you lease here</div>`:''}
+        ${reb?`<div class="rb"><b>PLUS up to ${esc(reb)} back</b> from ${esc(by)} when you lease here<span class="req">On the application, choose "Apartment Locator" and write ${esc(by)}. Not "Leasing Agent" or a website.</span></div>`:''}
         ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
         <div class="cta">${(SH.tourForm||tour)?`<button class="btn gold tourBtn" data-k="${k}">Tour with ${esc(first)}${reb?' & get up to '+esc(reb)+' back':''}</button>`:''}<small>List ${esc(by)} as your locator</small></div></div></div>`;
     });
@@ -245,15 +288,50 @@ fetch('/api/share/'+encodeURIComponent(token),{cache:'no-store'}).then(async r=>
     <div class="steps">
       <div class="step"><div class="n">1</div><b>Pick your favorites</b><span>Tap "Tour with ${esc(first)}" on any place you like.</span></div>
       <div class="step"><div class="n">2</div><b>${esc(first)} books your tours</b><span>Same-day tours, plus the latest specials and pricing.</span></div>
-      <div class="step"><div class="n">3</div><b>List your locator</b><span>Write <b>${esc(by)}</b> on the guest card and application.</span></div>
+      <div class="step"><div class="n">3</div><b>Write us down</b><span>For "How did you hear about us?" choose <b>Apartment Locator</b> and write <b>${esc(by)}</b>.</span></div>
       <div class="step"><div class="n">4</div><b>${reb?'Get your rebate':'Move in'}</b><span>${reb?`Up to ${esc(reb)} back after you move in.`:'Enjoy your new place.'}</span></div>
     </div>
-    <div class="must"><div><div class="lbl">Put this on every guest card &amp; application</div><div class="val">Locator: ${esc(by)}</div></div><div class="why">${reb?`This is how your rebate gets tracked. If it's missing, the property won't count you as my referral and you can't get your rebate.`:`This makes sure ${esc(first)} can keep helping you through move-in.`}</div></div></div>`;
+    <div class="must"><div><div class="lbl">Put this on every guest card &amp; application</div><div class="val">Locator: ${esc(by)}</div></div><div class="why">${reb?`Choose "Apartment Locator", "Locator Service" or "Realtor" (never "Leasing Agent", Apartments.com or Apartment List). <b>This is the only way we can pay your rebate.</b> <a href="#ref" style="color:var(--gold)">See the example</a>`:`This makes sure ${esc(first)} can keep helping you through move-in.`}</div></div></div>`;
   $('final').innerHTML=`<div class="box"><div><h2>Ready to tour${reb?` and get up to ${esc(reb)} back`:''}?</h2><p>Text ${esc(name)}${brand?' at '+esc(brand):''}. Free service, fast answers.</p></div><div class="heroCta" style="margin:0">${contactBtns(first,'dark')}</div></div>`;
-  $('fine').textContent=`${brand?brand+' · ':''}${name}, apartment locator. ${reb?`Rebates up to ${reb} on qualifying leases; amount varies by property and lease, and is paid after move-in once the property confirms the referral. You must list ${by} as your locator before you apply. `:''}Prices and specials change often and are confirmed before you apply. Photos are from each property.`;
+  $('fine').textContent=`${brand?brand+' · ':''}${name}, apartment locator. ${reb?`Rebates up to ${reb} on qualifying leases; amount varies by property and lease, and is paid after move-in once the property confirms the referral. To qualify, you must choose Apartment Locator, Locator Service or Realtor as your referral source and write ${by} on your guest card and application. Choosing Leasing Agent or a website such as Apartments.com or Apartment List means we cannot pay a rebate. `:''}Prices and specials change often and are confirmed before you apply. Photos are from each property.`;
   sticky(first,by,rebLine);
 }).catch(()=>{$('cards').innerHTML='<div class="msg">Couldn\'t load this page. Check your connection and try again.</div>';});
 
+function referralHTML(by,first,reb){
+  const pay=reb?`This is the only way we can pay your rebate of up to ${esc(reb)}.`:`This is the only way ${esc(first)} gets credit for helping you.`;
+  return `<div class="box">
+  <div class="rh"><span class="tag">⚠️ Required${reb?' for your rebate':''}</span><h2>Write us down as your referral source</h2>
+  <p>Every guest card and application asks <b>"How did you hear about us?"</b> Here's exactly what to pick.</p></div>
+  <div class="rb2">
+    <div class="mock" role="img" aria-label="Example rental application: How did you hear about us? Apartment Locator is selected">
+      <div class="mt"><i></i><i></i><i></i>&nbsp;Rental Application · Guest Card</div>
+      <div class="mb">
+        <div class="ml">How did you hear about us? <em>*</em></div>
+        <div class="ms"><span>Apartment Locator</span><span>▾</span></div>
+        <ul>
+          <li class="no">Apartments.com</li>
+          <li class="no">Apartment List</li>
+          <li class="no">Leasing Agent</li>
+          <li class="yes pick">Apartment Locator</li>
+          <li class="yes">Locator Service</li>
+          <li class="yes">Realtor / Real Estate Agent</li>
+          <li class="no">Zillow / other website</li>
+          <li class="no">Drive-by / Sign</li>
+        </ul>
+        <div class="ml">Locator / agent name <em>*</em></div>
+        <div class="mi">${esc(by)}</div>
+        <div class="cap">Example. Every property's form looks a little different.</div>
+      </div>
+    </div>
+    <div class="yn">
+      <div class="ok"><b class="t">✅ CHOOSE one of these</b><ul><li>Apartment Locator</li><li>Locator Service</li><li>Realtor / Real Estate Agent</li></ul></div>
+      <div class="bad"><b class="t">🚫 DO NOT choose</b><ul><li>Leasing Agent</li><li>Apartments.com</li><li>Apartment List</li><li>Any other website</li></ul><small>If you pick one of these, the property will not count you as our referral and we cannot pay your rebate.</small></div>
+      <div class="write"><div class="lbl">Then write the locator's name</div><div class="val">${esc(by)}</div></div>
+    </div>
+  </div>
+  <div class="only"><big>${pay}</big>Do it on the guest card when you tour and again on the application. If you can't find the option, ask the leasing office to list ${esc(by)} as your locator, or text ${esc(first)} before you apply.</div>
+  </div>`;
+}
 function contactBtns(first,style){
   const b=[];
   if(A.phone){b.push(`<a class="btn ${style==='dark'?'white':'gold'}" href="${esc(smsHref(A.phone,'Hi '+first+'! I saw the apartments you sent.'))}">Text ${esc(first)}</a>`);b.push(`<a class="btn ${style==='dark'?'white':'ghost'}" href="tel:${esc(tel(A.phone))}">Call ${esc(A.phone)}</a>`);}
@@ -294,7 +372,7 @@ $('tf').onsubmit=async e=>{
       err.style.display='block';
     }else{
       const first=(A.name||'').split(' ')[0]||'We';
-      $('tokTxt').textContent=`${first} got your request for ${p.n} and will reach out to set up your tour.${A.rebate?` Remember to list ${A.name}${A.brand?' with '+A.brand:''} as your locator to get up to ${A.rebate} back!`:''}`;
+      $('tokTxt').textContent=`${first} got your request for ${p.n} and will reach out to set up your tour.${A.rebate?` Important: on the guest card and application, choose "Apartment Locator" as how you heard about them and write ${A.name}${A.brand?' with '+A.brand:''}. Don't pick "Leasing Agent", Apartments.com or Apartment List. It's the only way we can pay your rebate of up to ${A.rebate}.`:''}`;
       $('tokBtns').innerHTML=A.phone?`<a class="btn gold" href="${esc(smsHref(A.phone,`Hi ${first}! I just requested a tour of ${p.n}.`))}">Text ${esc(first)} too</a>`:'';
       $('tf').style.display='none'; $('tok').style.display='block';
       $('tfWhen').value='';$('tfMsg').value='';
