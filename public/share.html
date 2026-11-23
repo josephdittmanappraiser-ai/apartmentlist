@@ -223,7 +223,7 @@ const $=id=>document.getElementById(id);
 const BR=['Studio','1 BR','2 BR','3 BR','4 BR'];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const money=v=>v==null?'—':'$'+Number(v).toLocaleString();
-const token=location.pathname.split('/s/')[1]||'';
+const token=location.pathname.split('/s/')[1]||location.pathname.replace(/^\/+|\/+$/g,'');
 const tel=s=>String(s||'').replace(/[^\d+]/g,'');
 const smsHref=(num,body)=>`sms:${tel(num)}${/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent(body)}`;
 let P=[],A={},SH={},lbL=[],lbI=0,lbN='',curK=-1;

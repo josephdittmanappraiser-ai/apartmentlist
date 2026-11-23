@@ -111,6 +111,10 @@ details summary{cursor:pointer}
 .linkbox input{flex:1}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:#120e02;font-weight:700}
+.slug{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.slug span{padding:8px 0 8px 9px;color:var(--mute);white-space:nowrap;font-size:13px;max-width:60%;overflow:hidden;text-overflow:ellipsis}
+.slug input{border:0!important;padding-left:2px!important;min-width:0;flex:1}
+.hint.ok{color:var(--ok)}.hint.bad{color:var(--bad)}
 .lb .cap{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#e5e7eb;font-size:13px}
 </style>
 </head>
@@ -211,6 +215,7 @@ details summary{cursor:pointer}
   <h2>Share with a client</h2>
   <ul class="mlist" id="mList"></ul>
   <div class="f"><label class="h">Client name (required)</label><input type="text" id="mClient" placeholder="e.g. Tierra Johnson"></div>
+  <div class="f" id="mSlugWrap" style="display:none"><label class="h">Link name (optional)</label><div class="slug"><span id="mHost"></span><input type="text" id="mSlug" autocomplete="off" spellcheck="false"></div><div class="hint" id="mSlugHint">Leave blank to use the client's name.</div></div>
   <div class="f"><label class="h">Client email (optional)</label><input type="text" id="mEmail" placeholder="client@email.com"></div>
   <div class="f"><label class="h">Client phone (optional)</label><input type="text" id="mPhone" placeholder="832-555-0100"></div>
   <div class="f"><label class="h">Note to the client (shows on their page)</label><textarea id="mNote" placeholder="Here are the places that fit your budget and move-in date. Let me know which ones you want to tour!"></textarea></div>
@@ -404,10 +409,10 @@ $('mMake').onclick=async()=>{
   if($('mClient').value.trim().length<2){alert("Enter the client's name first so tour requests are tied to them.");$('mClient').focus();return;}
   const b=$('mMake'); b.disabled=true; b.textContent='Creating…';
   try{
-    const r=await fetch('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:selProps().map(p=>p.id),client:$('mClient').value.trim(),clientEmail:$('mEmail').value.trim(),clientPhone:$('mPhone').value.trim(),note:$('mNote').value.trim(),br:sel.br})});
+    const r=await fetch('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:selProps().map(p=>p.id),slug:SHORT?$('mSlug').value.trim():'',client:$('mClient').value.trim(),clientEmail:$('mEmail').value.trim(),clientPhone:$('mPhone').value.trim(),note:$('mNote').value.trim(),br:sel.br})});
     const d=await r.json(); if(!r.ok)throw new Error(d.error||r.status);
     const L=selProps(), who=$('mClient').value.trim(), ag=d.agent||{};
-    $('mUrl').value=d.url; $('mExp').textContent=`Works for ${d.expiresDays} days. Shows photos, prices and specials, never commission or notes.`;
+    $('mUrl').value=d.url; $('mExp').textContent=`Works for ${d.expiresDays} days. Shows photos, prices and specials, never commission or notes.${SHORT?'':' Tip: attach a volume to this service in Railway to get short links.'}`;
     const hi=who?`Hi ${who},`:'Hi,';
     const sig=[ag.name,ag.brand,ag.phone].filter(Boolean).join('\n');
     const by=`${ag.name||''}${ag.brand?' with '+ag.brand:''}`, reb=ag.rebate;
@@ -427,13 +432,26 @@ function backHome(sent){
   const who=$('mClient').value.trim();
   $('modal').classList.remove('on');
   picked.clear();savePicked();onlyPicked=false;
-  ['mClient','mEmail','mPhone','mNote'].forEach(id=>$(id).value='');
+  ['mClient','mEmail','mPhone','mNote','mSlug'].forEach(id=>$(id).value='');slugHint();
   $('mOut').style.display='none';
   $('reset').onclick();
   window.scrollTo({top:0,behavior:'smooth'});
   $('hdrMsg').textContent=sent&&who?`List sent to ${who}. Ready for your next client.`:'';
 }
-let MAIL=null;
+let MAIL=null, SHORT=false, slugT=null;
+const slugify=v=>String(v||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40).replace(/-+$/,'');
+fetch('/api/config').then(r=>r.json()).then(c=>{SHORT=!!c.shortLinks;if(SHORT){$('mSlugWrap').style.display='block';$('mHost').textContent=location.host+'/';slugHint();}}).catch(()=>{});
+function slugHint(){
+  const v=$('mSlug').value.trim(),h=$('mSlugHint'),auto=slugify($('mClient').value);
+  $('mSlug').placeholder=auto||'tierra-johnson';h.className='hint';
+  if(!v){h.textContent=auto?`Leave blank to use ${location.host}/${auto}`:"Leave blank to use the client's name.";return;}
+  const s=slugify(v);clearTimeout(slugT);h.textContent=`Checking ${location.host}/${s}…`;
+  slugT=setTimeout(async()=>{try{const d=await (await fetch('/api/shares/check?slug='+encodeURIComponent(v))).json();
+    if($('mSlug').value.trim()!==v)return;
+    h.className='hint '+(d.ok?'ok':'bad');
+    h.textContent=d.ok?`✓ ${location.host}/${d.slug} is available`:d.taken?`"${d.slug}" is already used. Try another name.`:'Use 3 to 40 letters, numbers or dashes.';}catch(e){}},300);
+}
+$('mSlug').addEventListener('input',slugHint);$('mClient').addEventListener('input',slugHint);
 const mailTo=()=>$('mEmail').value.trim();
 function setMailLinks(){if(!MAIL)return;const to=encodeURIComponent(mailTo()),su=encodeURIComponent(MAIL.subject),bd=encodeURIComponent(MAIL.body);
   $('mGmail').href=`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`;

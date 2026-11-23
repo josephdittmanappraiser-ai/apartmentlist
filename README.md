@@ -42,6 +42,13 @@ What the client never sees: commission, escort %, bonus, occupancy, management, 
 - Links are signed, so nobody can edit one to show other properties. Changing `SHARE_SECRET` (or `SITE_PASSWORD`, if you didn't set a secret) turns off every link you've sent, so set a `SHARE_SECRET` once and leave it.
 - If a property is removed from Airtable, it disappears from links that included it.
 
+## Short links
+With short links on, a client link looks like `apartmentlist-production.up.railway.app/tierra-johnson` instead of a long code.
+- In the share window, type a **Link name** (letters, numbers, dashes), or leave it blank to use the client's name. If that name is taken, `-2`, `-3` and so on is added.
+- Turn them on once: in Railway, right-click the service (or use the **+** button) → **Volume** → attach it to this service with mount path `/data`. Railway redeploys. The links are saved on that volume, so they survive redeploys.
+- Without a volume, links still work but use the long form.
+- Short links stop working after `SHARE_DAYS`, the same as long ones.
+
 ## Tour-request emails
 When a client taps **Tour with Joseph** on their page, they fill in a short form (name prefilled, phone/email, when they can tour, a message). The request is emailed to `NOTIFY_EMAIL` (apartment@txhighrisers.com) with:
 - the client name, phone and email you entered when you made the link, plus anything they typed

@@ -3,6 +3,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const path = require("path");
+const fs = require("fs");
 
 const {
   AIRTABLE_TOKEN,                     // Airtable personal access token (data.records:read on this base)
@@ -13,6 +14,7 @@ const {
   CACHE_MINUTES = "15",
   SHARE_SECRET,                       // optional: signs share links (defaults to SITE_PASSWORD)
   SHARE_DAYS = "30",                  // how long a share link works
+  DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || "", // where short links are saved (a Railway volume)
   PUBLIC_URL,                         // optional: e.g. https://finder.yourdomain.com
   AGENT_NAME = "Joseph Dittman", AGENT_PHONE = "832-720-7978", AGENT_EMAIL = "", BRAND_NAME = "High Risers",
   REBATE = "$500",                    // shown as "up to $500 rebate"; set to "" to hide
@@ -56,6 +58,26 @@ const clientView = (p) => ({
   id: p.id, n: p.n, sm: p.sm, c: p.c, z: p.z, a: p.a, yb: p.yb, rn: p.rn, br: p.br, p: p.p,
   spc: p.spc, type: p.type, ph: p.ph,
 });
+// --- Short links: /tierra-johnson -> a signed share token, saved on the Railway volume ---
+const LINKS_FILE = DATA_DIR ? path.join(DATA_DIR, "links.json") : "";
+let links = {};
+if (LINKS_FILE) {
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); links = JSON.parse(fs.readFileSync(LINKS_FILE, "utf8")); }
+  catch (e) { if (e.code !== "ENOENT") console.error("Could not read short links:", e.message); }
+  console.log(`Short links on: ${Object.keys(links).length} saved in ${LINKS_FILE}`);
+} else console.log("Short links off: attach a Railway volume to turn them on");
+function saveLinks() { const tmp = LINKS_FILE + ".tmp"; fs.writeFileSync(tmp, JSON.stringify(links)); fs.renameSync(tmp, LINKS_FILE); }
+const RESERVED = new Set(["api", "s", "healthz", "share", "index", "login", "admin", "static", "public", "favicon", "robots", "assets"]);
+const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
+const slugify = (v) => String(v || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+// A token or a short-link name -> { t: token contents, tok, slug }
+function resolve(id) {
+  id = String(id || "");
+  if (id.includes(".")) return { t: readToken(id), tok: id, slug: "" };
+  const rec = links[id.toLowerCase()];
+  return rec ? { t: readToken(rec.tok), tok: rec.tok, slug: id.toLowerCase() } : { t: null };
+}
+
 // --- Tour requests from client pages -> email to the team ---
 const hits = new Map(); // simple per-IP limit: 8 requests / hour
 function limited(ip) {
@@ -76,7 +98,7 @@ async function sendEmail({ to, subject, html, text, replyTo, bcc }) {
   if (!r.ok) throw new Error(`Email failed ${r.status}: ${await r.text()}`);
 }
 app.post("/api/share/:token/tour", async (req, res) => {
-  const t = readToken(req.params.token);
+  const { t, slug } = resolve(req.params.token);
   if (!t) return res.status(404).json({ error: "This link isn't valid." });
   if (t.expired) return res.status(410).json({ error: "This link has expired." });
   const b = req.body || {};
@@ -96,7 +118,7 @@ app.post("/api/share/:token/tour", async (req, res) => {
     if (!p) return res.status(404).json({ error: "That property is no longer listed." });
     const others = (t.i || []).map((id) => properties.find((x) => x.id === id)).filter(Boolean).map((x) => x.n);
     const base = (PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/$/, "");
-    const link = `${base}/s/${req.params.token}`;
+    const link = slug ? `${base}/${slug}` : `${base}/s/${req.params.token}`;
     const prices = p.p.map((v, i) => (v == null ? null : `${BRS[i]} $${v.toLocaleString()}`)).filter(Boolean).join(" · ");
     const client = t.c || form.name || "Unknown client";
     const rows = [
@@ -126,7 +148,7 @@ app.post("/api/share/:token/tour", async (req, res) => {
 
 app.get("/s/:token", (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(__dirname, "public", "share.html")));
 app.get("/api/share/:token", async (req, res) => {
-  const t = readToken(req.params.token);
+  const { t } = resolve(req.params.token);
   if (!t) return res.status(404).json({ error: "This link isn't valid." });
   if (t.expired) return res.status(410).json({ error: "This link has expired. Ask your agent for a new one." });
   try {
@@ -146,6 +168,11 @@ const safeEq = (a, b) => {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 };
+app.get("/:slug", (req, res, next) => {
+  const s = req.params.slug.toLowerCase();
+  if (!links[s]) return next();
+  res.set("Cache-Control", "no-cache").sendFile(path.join(__dirname, "public", "share.html"));
+});
 app.use((req, res, next) => {
   if (req.path === "/healthz" || req.path.startsWith("/s/") || req.path.startsWith("/api/share/") || req.path === "/share.html") return next();
   const [scheme, encoded] = (req.headers.authorization || "").split(" ");
@@ -228,7 +255,7 @@ async function getData(force) {
 
 // Create a share link (team only — behind the login)
 app.post("/api/shares", (req, res) => {
-  const { ids, client = "", clientEmail = "", clientPhone = "", note = "", br = -1 } = req.body || {};
+  const { ids, client = "", clientEmail = "", clientPhone = "", note = "", br = -1, slug = "" } = req.body || {};
   if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: "Pick at least one property." });
   if (String(client).trim().length < 2) return res.status(400).json({ error: "Enter the client's name so tour requests are tied to them." });
   const clean = [...new Set(ids.filter((x) => typeof x === "string" && /^rec[A-Za-z0-9]{14}$/.test(x)))].slice(0, 40);
@@ -238,7 +265,23 @@ app.post("/api/shares", (req, res) => {
     cp: String(clientPhone).trim().slice(0, 30), t: Date.now(), m: String(note).slice(0, 600),
     b: Number.isInteger(br) && br >= 0 && br <= 4 ? br : -1, e: Date.now() + days * 864e5 });
   const base = (PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/$/, "");
-  res.json({ url: `${base}/s/${tok}`, count: clean.length, expiresDays: days,
+  let url = `${base}/s/${tok}`, short = "";
+  if (LINKS_FILE) {
+    const wanted = slugify(slug);
+    if (String(slug).trim()) {
+      if (!SLUG_RE.test(wanted) || RESERVED.has(wanted)) return res.status(400).json({ error: "Link name: use 3 to 40 letters, numbers or dashes." });
+      if (links[wanted]) return res.status(409).json({ error: `"${wanted}" is already used for another list. Try another link name.` });
+      short = wanted;
+    } else {
+      const root = slugify(client) || "list";
+      short = SLUG_RE.test(root) && !RESERVED.has(root) && !links[root] ? root : "";
+      for (let n = 2; !short; n++) { const c = `${root.slice(0, 34)}-${n}`; if (!links[c]) short = c; }
+    }
+    links[short] = { tok, c: String(client).trim().slice(0, 80), at: Date.now() };
+    try { saveLinks(); url = `${base}/${short}`; }
+    catch (e) { console.error("Could not save short link:", e.message); delete links[short]; short = ""; }
+  }
+  res.json({ url, short, longUrl: `${base}/s/${tok}`, count: clean.length, expiresDays: days,
     emailReady: !!RESEND_API_KEY,
     agent: { name: AGENT_NAME, phone: AGENT_PHONE, email: AGENT_EMAIL, brand: BRAND_NAME, rebate: REBATE } });
 });
@@ -266,6 +309,12 @@ app.post("/api/shares/email", async (req, res) => {
     console.error(e);
     res.status(e.code === "no_email" ? 503 : 502).json({ error: e.code === "no_email" ? "Email sending isn't set up yet (RESEND_API_KEY)." : "The email service refused it." });
   }
+});
+
+app.get("/api/config", (req, res) => res.json({ shortLinks: !!LINKS_FILE }));
+app.get("/api/shares/check", (req, res) => {
+  const s = slugify(req.query.slug);
+  res.json({ slug: s, ok: SLUG_RE.test(s) && !RESERVED.has(s) && !links[s], taken: !!links[s] });
 });
 
 app.get("/api/properties", async (req, res) => {
