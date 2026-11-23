@@ -124,7 +124,7 @@ app.post("/api/share/:token/tour", async (req, res) => {
   }
 });
 
-app.get("/s/:token", (req, res) => res.sendFile(path.join(__dirname, "public", "share.html")));
+app.get("/s/:token", (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(__dirname, "public", "share.html")));
 app.get("/api/share/:token", async (req, res) => {
   const t = readToken(req.params.token);
   if (!t) return res.status(404).json({ error: "This link isn't valid." });
@@ -254,6 +254,6 @@ app.get("/api/properties", async (req, res) => {
 });
 
 app.get("/healthz", (_, res) => res.send("ok"));
-app.use(express.static(path.join(__dirname, "public"), { maxAge: "5m" }));
+app.use(express.static(path.join(__dirname, "public"), { setHeaders: (res) => res.set("Cache-Control", "no-cache") })); // always serve the latest page after a deploy
 
 app.listen(PORT, () => console.log(`Finder running on port ${PORT}`));
