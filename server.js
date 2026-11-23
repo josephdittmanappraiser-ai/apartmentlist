@@ -66,12 +66,12 @@ function limited(ip) {
 }
 const h = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const BRS = ["Studio", "1 BR", "2 BR", "3 BR", "4 BR"];
-async function sendEmail({ to, subject, html, text, replyTo }) {
+async function sendEmail({ to, subject, html, text, replyTo, bcc }) {
   if (!RESEND_API_KEY) throw Object.assign(new Error("Email isn't set up (RESEND_API_KEY missing)"), { code: "no_email" });
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, html, text, ...(replyTo ? { reply_to: replyTo } : {}) }),
+    body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, html, text, ...(replyTo ? { reply_to: replyTo } : {}), ...(bcc ? { bcc: [bcc] } : {}) }),
   });
   if (!r.ok) throw new Error(`Email failed ${r.status}: ${await r.text()}`);
 }
@@ -239,7 +239,33 @@ app.post("/api/shares", (req, res) => {
     b: Number.isInteger(br) && br >= 0 && br <= 4 ? br : -1, e: Date.now() + days * 864e5 });
   const base = (PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/$/, "");
   res.json({ url: `${base}/s/${tok}`, count: clean.length, expiresDays: days,
+    emailReady: !!RESEND_API_KEY,
     agent: { name: AGENT_NAME, phone: AGENT_PHONE, email: AGENT_EMAIL, brand: BRAND_NAME, rebate: REBATE } });
+});
+
+// Email a share link straight to the client (team only — behind the login)
+app.post("/api/shares/email", async (req, res) => {
+  const { to = "", subject = "", text = "", url = "" } = req.body || {};
+  const addr = String(to).trim();
+  if (!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(addr) || addr.length > 120) return res.status(400).json({ error: "That client email doesn't look right." });
+  if (!String(text).trim()) return res.status(400).json({ error: "The message is empty." });
+  const body = String(text).slice(0, 6000), link = String(url).slice(0, 2000);
+  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;color:#111;max-width:600px">
+    <div style="background:#0b0d12;color:#fff;padding:16px 18px;border-radius:10px 10px 0 0"><div style="font-weight:900;letter-spacing:.12em">HIGH RISERS</div>
+    <div style="font-size:20px;font-weight:800;margin-top:4px">${h(AGENT_NAME)} <span style="color:#c9a227">with ${h(BRAND_NAME)}</span></div></div>
+    <div style="border:1px solid #e7e3da;border-top:0;padding:18px;border-radius:0 0 10px 10px">
+    ${h(body).replace(/\n/g, "<br>")}
+    ${link ? `<p style="margin:20px 0 0"><a href="${h(link)}" style="background:#c9a227;color:#120e02;padding:12px 18px;border-radius:10px;font-weight:800;text-decoration:none;display:inline-block">See my apartments${REBATE ? ` · up to ${h(REBATE)} back` : ""}</a></p>` : ""}
+    </div></div>`;
+  try {
+    await sendEmail({ to: addr, subject: String(subject).slice(0, 200) || "Your hand-picked Houston apartments", html, text: body,
+      replyTo: AGENT_EMAIL || NOTIFY_EMAIL, bcc: NOTIFY_EMAIL });
+    console.log(`List emailed to ${addr}`);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(e.code === "no_email" ? 503 : 502).json({ error: e.code === "no_email" ? "Email sending isn't set up yet (RESEND_API_KEY)." : "The email service refused it." });
+  }
 });
 
 app.get("/api/properties", async (req, res) => {

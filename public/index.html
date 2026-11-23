@@ -220,7 +220,9 @@ details summary{cursor:pointer}
     <label class="h">Share link</label>
     <div class="linkbox"><input type="text" id="mUrl" readonly><button class="btn" id="mCopy">Copy</button></div>
     <div class="hint" id="mExp"></div>
-    <div class="acts"><a class="btn pri" id="mMail" target="_blank" rel="noopener">Email it</a><a class="btn" id="mSms">Text it</a><a class="btn" id="mOpen" target="_blank" rel="noopener">Preview client page</a></div>
+    <div class="acts"><button class="btn pri" id="mMail" type="button">Email it</button><a class="btn" id="mSms">Text it</a><a class="btn" id="mOpen" target="_blank" rel="noopener">Preview client page</a></div>
+    <div class="hint" id="mMailMsg"></div>
+    <div class="hint">Other ways to email: <a id="mGmail" target="_blank" rel="noopener">open in Gmail</a> · <a id="mMailApp">open in your email app</a></div>
     <div class="acts"><button class="btn" id="mDone" style="width:100%">Done, back to home</button></div>
     <div class="hint">After you tap Email it or Text it, this closes and the Finder goes back to the start for your next client.</div>
   </div>
@@ -401,7 +403,10 @@ $('mMake').onclick=async()=>{
     const sig=[ag.name,ag.brand,ag.phone].filter(Boolean).join('\n');
     const by=`${ag.name||''}${ag.brand?' with '+ag.brand:''}`, reb=ag.rebate;
     const body=`${hi}\n\nHere are ${L.length} apartment${L.length>1?'s':''} I hand-picked for you:\n${L.map(p=>'• '+p.n+' ('+p.sm+')').join('\n')}\n\nSee photos, prices and specials, and request tours here:\n${d.url}\n\n${reb?`💰 Lease any of these through me and get up to ${reb} back! Just list ${by} as your apartment locator on every guest card and application.\n\n`:''}My service is 100% free to you. Tap "Tour" on any place and I'll set it up.${sig?'\n\n'+sig:''}`;
-    $('mMail').href=`mailto:${$('mEmail').value.trim().replace(/[^\w.+@-]/g,'')}?subject=${encodeURIComponent((who?who+', your':'Your')+' hand-picked Houston apartments'+(reb?` (up to ${reb} back)`:''))}&body=${encodeURIComponent(body)}`;
+    const subject=(who?who+', your':'Your')+' hand-picked Houston apartments'+(reb?` (up to ${reb} back)`:'');
+    MAIL={subject,body,url:d.url,ready:!!d.emailReady};
+    $('mMailMsg').textContent=d.emailReady?'Email it sends the list straight to the client from High Risers. You get a copy.':'Email it opens Gmail with the message written. (To send straight from the Finder, add RESEND_API_KEY in Railway.)';
+    setMailLinks();
     const sms=`${hi} it's ${ag.name||'your locator'}${ag.brand?' with '+ag.brand:''}! Here are ${L.length} apartments I picked for you: ${d.url}${reb?` Lease through me and get up to ${reb} back. List ${by} as your locator!`:''}`;
     const ph=$('mPhone').value.replace(/[^\d+]/g,'');
     $('mSms').href=`sms:${ph}${/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent(sms)}`;
@@ -419,7 +424,26 @@ function backHome(sent){
   window.scrollTo({top:0,behavior:'smooth'});
   $('hdrMsg').textContent=sent&&who?`List sent to ${who}. Ready for your next client.`:'';
 }
-$('mMail').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
+let MAIL=null;
+const mailTo=()=>$('mEmail').value.trim();
+function setMailLinks(){if(!MAIL)return;const to=encodeURIComponent(mailTo()),su=encodeURIComponent(MAIL.subject),bd=encodeURIComponent(MAIL.body);
+  $('mGmail').href=`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`;
+  $('mMailApp').href=`mailto:${to}?subject=${su}&body=${bd}`;}
+$('mEmail').addEventListener('input',setMailLinks);
+$('mGmail').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
+$('mMailApp').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
+$('mMail').onclick=async()=>{
+  const to=mailTo(),msg=$('mMailMsg'),b=$('mMail');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){msg.textContent="Type the client's email in the Client email box above, then tap Email it.";$('mEmail').focus();return;}
+  if(!MAIL.ready){window.open($('mGmail').href,'_blank');setTimeout(()=>backHome(true),400);return;}
+  b.disabled=true;b.textContent='Sending…';
+  try{
+    const r=await fetch('/api/shares/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,subject:MAIL.subject,text:MAIL.body,url:MAIL.url})});
+    const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||r.status);
+    backHome(true);$('hdrMsg').textContent=`List emailed to ${to}. Ready for your next client.`;
+  }catch(e){msg.textContent='Could not send: '+e.message+' Use "open in Gmail" below instead.';}
+  b.disabled=false;b.textContent='Email it';
+};
 $('mSms').addEventListener('click',()=>setTimeout(()=>backHome(true),400));
 $('mDone').onclick=()=>backHome(true);
 $('mCopy').onclick=()=>{const i=$('mUrl');i.select();try{navigator.clipboard.writeText(i.value).then(()=>{$('mCopy').textContent='Copied';setTimeout(()=>$('mCopy').textContent='Copy',2000)})}catch(e){document.execCommand('copy')}};

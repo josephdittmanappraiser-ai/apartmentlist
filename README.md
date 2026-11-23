@@ -31,7 +31,8 @@ Railway detects Node from `package.json` and runs `npm start`. It provides `PORT
 ## Sharing with clients
 1. Check **Select to share** on the properties you want. A bar at the bottom counts them; **Show only selected** lets you review your picks. Your picks are remembered in your browser.
 2. Click **Share with client…**, add the client's name, email or phone and an optional note, then **Create link**.
-3. Use **Copy**, **Email it** (opens your email app with the message written) or **Text it** (opens Messages on your phone or Mac).
+3. Use **Copy**, **Email it** or **Text it** (opens Messages on your phone or Mac). Put the client's email in the **Client email** box first. With `RESEND_API_KEY` set, **Email it** sends the list straight to the client from High Risers, replies go to `AGENT_EMAIL`, and you get a copy at `NOTIFY_EMAIL`. Without it, **Email it** opens Gmail with the message written.
+4. After you email or text it, the Finder clears your picks and goes back to the start for the next client.
 
 What the client sees: a High Risers branded page with Joseph Dittman and the up-to-$500 rebate throughout, your note, and each property's photos, starting rents, specials and year built, plus a **Tour with Joseph** button on each property and Text/Call buttons. Once email is set up (see **Tour-request emails** below) the Tour button opens a short request form that emails you; until then it opens a text to Joseph.
 
