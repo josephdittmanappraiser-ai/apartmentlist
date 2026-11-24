@@ -37,6 +37,7 @@ const F = {
   studio: "fldVNxRPq1fRPAjax", br1: "fldl63UzW95QBmiJP", br2: "flde6AaxrP6mIIwrT", br3: "fldno3hIZDrelVRoM", br4: "fldZGg3CzjMKbKMmZ",
   status: "fldDpDOkTA5nRVZLF", sources: "fld7yUkKJiPBsPIRV", special: "fldo77xReQSwCOGNH", site: "fldeiZW6IZqFgW7A9",
   notes: "fldriI8EJNrS8nX4D", type: "fldCEQUbgTjLVqIiS", photos: "fldh4c0qhPVS5LyX7",
+  amen: "fldJPvDMel5GnzEqf", bldg: "fldorxWy5NuO2KYkf", park: "fldEr1jqvb8K6Xi5b", styles: "fldVv0yMr6DIFzKiM", den: "fld3j9cjVzCUR7Hwi",
 };
 
 const app = express();
@@ -57,7 +58,7 @@ function readToken(tok) {
 }
 const clientView = (p) => ({
   id: p.id, n: p.n, sm: p.sm, c: p.c, z: p.z, a: p.a, yb: p.yb, rn: p.rn, br: p.br, p: p.p,
-  spc: p.spc, type: p.type, ph: p.ph, vid: p.vid,
+  spc: p.spc, type: p.type, ph: p.ph, vid: p.vid, am: p.am, bt: p.bt, pk: p.pk, us: p.us, den: p.den,
 });
 // --- Short links: /tierra-johnson -> a signed share token, saved on the Railway volume ---
 const LINKS_FILE = DATA_DIR ? path.join(DATA_DIR, "links.json") : "";
@@ -189,6 +190,7 @@ app.use((req, res, next) => {
 let cache = { at: 0, data: null, pending: null };
 const num = (v) => (v === undefined || v === null || v === "" ? null : Number(v));
 const sel = (v) => (v && typeof v === "object" ? v.name : v) || "";
+const multi = (v) => (Array.isArray(v) ? v : v ? [v] : []).map(sel).filter(Boolean);
 
 async function fetchAllRecords() {
   const out = [];
@@ -266,6 +268,12 @@ function toProperty(rec) {
     type: sel(f[F.type]),
     ph: photos,
     vid: findVideos(f),
+    am: multi(f[F.amen]),
+    // building height; until it's filled in, Type "High Rise" counts as High-rise
+    bt: sel(f[F.bldg]) || (/high.?rise/i.test(sel(f[F.type])) ? "High-rise" : ""),
+    pk: multi(f[F.park]),
+    us: multi(f[F.styles]),
+    den: !!f[F.den],
   };
 }
 

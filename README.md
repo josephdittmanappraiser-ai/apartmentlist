@@ -66,6 +66,15 @@ Until `RESEND_API_KEY` is set, the tour button just opens a text to Joseph inste
 
 **Client name is required** to create a link, so every request ties back to a person. Client phone and email are optional but go into the email too.
 
+## Amenity, building, parking and unit-style filters
+The Finder filters on five Airtable fields in **Properties**. Fill them in and the filters pick them up on the next refresh:
+- **Building Type**: Low-rise (1–3 stories), Mid-rise (4–9) or High-rise (10+). Until it's set, a property whose **Type** is High Rise counts as High-rise.
+- **Unit Styles**: Flat, Townhome, Loft, Penthouse (pick all that apply).
+- **Study/Den**: tick if any floor plan has a study or den.
+- **Parking**: garage, covered, surface lot, valet and so on (pick all that apply).
+- **Amenities**: pool, fitness center, pet friendly and so on. The filter shows properties that have *every* amenity you tap.
+Each filter shows how many properties have it filled in. You can add new choices in Airtable and they appear as new chips. These details also show on the client's page.
+
 ## Notes
 - If you rename fields in Airtable nothing breaks, because the code uses field IDs. If you delete a field, that information disappears from the cards.
 - If Airtable is unreachable, the site keeps showing the last copy it loaded and says so at the top.

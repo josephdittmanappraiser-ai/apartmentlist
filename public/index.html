@@ -33,8 +33,8 @@ h1 em{font-style:normal;color:var(--acc)}
 #hdrMsg{font-size:12.5px;color:#f3d77a;margin-top:8px;min-height:1em}
 .wrap{display:grid;grid-template-columns:290px 1fr;gap:16px;padding:12px 20px 30px;align-items:start}
 @media(max-width:820px){.wrap{grid-template-columns:1fr}}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;position:sticky;top:10px}
-@media(max-width:820px){.panel{position:static}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+@media(max-width:820px){.panel{position:static;max-height:none}}
 .f{margin-bottom:14px}
 .f label.h{display:block;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-bottom:6px}
 input[type=number],input[type=text],select{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
@@ -191,6 +191,27 @@ details summary{cursor:pointer}
       </select>
     </div>
     <div class="f">
+      <label class="h">Building type</label>
+      <div class="chips" id="btChips"></div>
+      <div class="hint" id="btHint"></div>
+    </div>
+    <div class="f">
+      <label class="h">Unit style</label>
+      <div class="chips" id="usChips"></div>
+      <label class="check" style="margin-top:8px"><input type="checkbox" id="denOnly"> Has a Study/Den floor plan</label>
+      <div class="hint" id="usHint"></div>
+    </div>
+    <div class="f">
+      <label class="h">Parking</label>
+      <div class="chips" id="pkChips"></div>
+      <div class="hint" id="pkHint"></div>
+    </div>
+    <div class="f">
+      <label class="h">Amenities</label>
+      <div class="chips" id="amChips"></div>
+      <div class="hint" id="amHint"></div>
+    </div>
+    <div class="f">
       <label class="check"><input type="checkbox" id="spOnly"> Has a move-in special</label>
       <label class="check"><input type="checkbox" id="phOnly"> Has photos</label>
       <label class="check"><input type="checkbox" id="vidOnly"> Has a video tour</label>
@@ -239,7 +260,31 @@ details summary{cursor:pointer}
 <div class="lb" id="lb"><button class="x" id="lbX" aria-label="Close">×</button><button class="nav prev" id="lbP" aria-label="Previous">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbN" aria-label="Next">›</button><div class="cap" id="lbCap"></div></div>
 <script>
 const BR=['Studio','1 BR','2 BR','3 BR','4 BR'];
-let D=[],sel={br:-1,sm:new Set(),ty:new Set()};
+let D=[],sel={br:-1,sm:new Set(),ty:new Set(),bt:new Set(),us:new Set(),pk:new Set(),am:new Set()};
+// Chip filters fed by Airtable fields. all:true = property must have every chip picked; otherwise any one is enough.
+const GROUPS={
+  bt:{field:'Building Type',opts:['Low-rise','Mid-rise','High-rise'],get:p=>p.bt?[p.bt]:[]},
+  us:{field:'Unit Styles',opts:['Flat','Townhome','Loft','Penthouse'],get:p=>p.us||[]},
+  pk:{field:'Parking',opts:['Parking garage','Attached garage','Detached garage','Covered parking','Surface lot','Reserved spot','Valet','Street parking'],get:p=>p.pk||[]},
+  am:{field:'Amenities',all:true,opts:['Pool','Fitness center','In-unit washer/dryer','Pet friendly','Dog park','Balcony/patio','Rooftop deck','Concierge','Controlled access','Elevator','Coworking space','Package lockers','Clubhouse','EV charging','Furnished available','Short-term lease'],get:p=>p.am||[]},
+};
+function rebuildGroup(k){
+  const g=GROUPS[k],counts={};D.forEach(p=>g.get(p).forEach(v=>counts[v]=(counts[v]||0)+1));
+  const names=[...g.opts,...Object.keys(counts).filter(v=>!g.opts.includes(v)).sort()];
+  const box=$(k+'Chips');box.innerHTML='';
+  names.forEach(t=>{const c=document.createElement('button');c.className='chip'+(sel[k].has(t)?' on':'');c.innerHTML=`${esc(t)}<span class="ct">${counts[t]||0}</span>`;c.onclick=()=>{sel[k].has(t)?sel[k].delete(t):sel[k].add(t);rebuildGroup(k);render();};box.appendChild(c);});
+  const filled=D.filter(p=>g.get(p).length).length;
+  let hint=(g.all?'Shows properties with every amenity you tap.':'Tap one or more; a property needs any one of them.')+` Filled in for ${filled} of ${D.length} properties (${g.field} field in Airtable).`;
+  if(k==='us'){const d=D.filter(p=>p.den).length;hint+=` Study/Den ticked on ${d}.`;}
+  if(k==='bt')hint+=' Until it is filled in, Type "High Rise" counts as High-rise.';
+  $(k+'Hint').textContent=hint;
+}
+const rebuildGroups=()=>Object.keys(GROUPS).forEach(rebuildGroup);
+function matchGroups(p){
+  for(const k in GROUPS){if(!sel[k].size)continue;const v=GROUPS[k].get(p);
+    if(GROUPS[k].all?![...sel[k]].every(x=>v.includes(x)):![...sel[k]].some(x=>v.includes(x)))return false;}
+  return true;
+}
 const tyOf=p=>p.type||'Not set';
 const $=id=>document.getElementById(id);
 const money=v=>v==null?'—':'$'+v.toLocaleString();
@@ -253,8 +298,8 @@ function init(){
   $('refresh').onclick=()=>{setStatus('Refreshing from Airtable…');loadData(true);};
   $('smClear').onclick=()=>{sel.sm.clear();sl.querySelectorAll('input').forEach(i=>i.checked=false);render();};
   ['pmin','pmax','q'].forEach(id=>$(id).oninput=render);
-  ['avail','occ','age','reno','com','spOnly','phOnly','vidOnly','sort'].forEach(id=>$(id).onchange=render);
-  $('reset').onclick=()=>{location.hash='';['pmin','pmax','q'].forEach(id=>$(id).value='');['occ','age','com'].forEach(id=>$(id).value='');$('avail').checked=true;$('reno').checked=false;$('spOnly').checked=false;$('phOnly').checked=false;$('vidOnly').checked=false;$('smClear').onclick();sel.ty.clear();rebuildTypes();bc.children[0].click();};
+  ['avail','occ','age','reno','com','spOnly','phOnly','vidOnly','denOnly','sort'].forEach(id=>$(id).onchange=render);
+  $('reset').onclick=()=>{location.hash='';['pmin','pmax','q'].forEach(id=>$(id).value='');['occ','age','com'].forEach(id=>$(id).value='');$('avail').checked=true;$('reno').checked=false;$('spOnly').checked=false;$('phOnly').checked=false;$('vidOnly').checked=false;$('denOnly').checked=false;$('smClear').onclick();sel.ty.clear();rebuildTypes();Object.keys(GROUPS).forEach(k=>sel[k].clear());rebuildGroups();bc.children[0].click();};
   $('copyAll').onclick=copyList;
   render();
 }
@@ -267,7 +312,7 @@ function rebuildTypes(){
   $('typeHint').textContent=names.length<=1?'All properties have the same type. Set the Type field in Airtable (for example High-rise, Rental home) to filter by it.':'Tap one or more types. Comes from the Type field in Airtable.';
 }
 function rebuildSubmarkets(){
-  rebuildTypes();
+  rebuildTypes();rebuildGroups();
   const counts={};D.forEach(p=>counts[p.sm]=(counts[p.sm]||0)+1);
   const sl=$('smList');sl.innerHTML='';
   Object.keys(counts).sort().forEach(s=>{const l=document.createElement('label');l.innerHTML=`<input type="checkbox" value="${esc(s)}"${sel.sm.has(s)?' checked':''}> ${esc(s)}<span class="ct">${counts[s]}</span>`;l.querySelector('input').onchange=e=>{e.target.checked?sel.sm.add(s):sel.sm.delete(s);render();};sl.appendChild(l);});
@@ -284,6 +329,8 @@ function filtered(){
   return D.map(p=>{
     if(sel.sm.size&&!sel.sm.has(p.sm))return null;
     if(sel.ty.size&&!sel.ty.has(tyOf(p)))return null;
+    if(!matchGroups(p))return null;
+    if($('denOnly').checked&&!p.den)return null;
     if(q&&!(p.n+' '+p.c+' '+p.z+' '+p.a+' '+p.sm).toLowerCase().includes(q))return null;
     if(occ&&(p.oc==null||p.oc>occ))return null;
     const yr=reno&&p.rn?Math.max(p.rn,p.yb||0):p.yb;
@@ -322,12 +369,17 @@ function render(){
     if(p.u)tags.push(`<span class="tag">${p.u} units</span>`);
     if(p.cl)tags.push(`<span class="tag">Class ${esc(p.cl)}</span>`);
     if(p.type)tags.push(`<span class="tag">${esc(p.type)}</span>`);
+    if(p.bt)tags.push(`<span class="tag">${esc(p.bt)}</span>`);
+    (p.us||[]).forEach(u=>tags.push(`<span class="tag">${esc(u)}</span>`));
+    if(p.den)tags.push(`<span class="tag">Study/Den</span>`);
     if(p.st!=='Complete')tags.push(`<span class="tag ${p.st==='No price found'?'r':'w'}">${p.st}</span>`);
     const nm=p.url?`<a href="${p.url}" target="_blank" rel="noopener">${esc(p.n)}</a>`:esc(p.n);
     const on=picked.has(p.id);
     return `<div class="card${on?' sel':''}" data-id="${esc(p.id)}">${photoBlock(p)}<div class="cbody"><label class="pick"><input type="checkbox" class="pk" data-id="${esc(p.id)}"${on?' checked':''}> ${on?'Selected':'Select to share'}</label><div><h3>${nm}</h3><div class="meta">${esc(p.a||p.c)} · ${esc(p.z)} · ${esc(p.sm)}</div><div class="meta">${esc(p.mg)}</div></div>
     <div class="prices">${pr}</div><div class="tags">${tags.join('')}</div>
     ${p.spc?`<div class="special">${esc(p.spc)}</div>`:''}
+    ${(p.pk||[]).length?`<div class="meta"><b>Parking:</b> ${esc(p.pk.join(', '))}</div>`:''}
+    ${(p.am||[]).length?`<div class="meta"><b>Amenities:</b> ${esc(p.am.join(', '))}</div>`:''}
     ${(p.vid||[]).length?`<div class="vids">${p.vid.map(v=>`<a class="vbtn" href="${esc(v.url)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.label)}</a>`).join('')}</div>`:''}
     <details><summary>Source & notes</summary><div style="margin-top:4px">${esc(p.src||'')}</div><div style="margin-top:4px">${esc(p.nt||'')}</div></details></div></div>`;
   }).join('')+(R.length>400?`<div class="empty">Showing first 400 of ${R.length}. Narrow the filters to see the rest.</div>`:'');
